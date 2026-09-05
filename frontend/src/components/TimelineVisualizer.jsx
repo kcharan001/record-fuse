@@ -5,6 +5,10 @@ export default function TimelineVisualizer({ timeline, aiAnalysis }) {
   const [filterSource, setFilterSource] = useState('ALL'); // 'ALL', 'record_A', 'record_B'
   const [selectedOverlap, setSelectedOverlap] = useState(null);
 
+  const totalCount = (timeline || []).length;
+  const countA = (timeline || []).filter(e => e.source_record === 'record_A').length;
+  const countB = (timeline || []).filter(e => e.source_record === 'record_B').length;
+
   const filteredTimeline = (timeline || []).filter((item) => {
     if (filterSource === 'ALL') return true;
     return item.source_record === filterSource;
@@ -57,7 +61,7 @@ export default function TimelineVisualizer({ timeline, aiAnalysis }) {
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            ALL (13)
+            ALL ({totalCount})
           </button>
           <button
             onClick={() => setFilterSource('record_A')}
@@ -67,7 +71,7 @@ export default function TimelineVisualizer({ timeline, aiAnalysis }) {
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            RECORD A (6)
+            RECORD A ({countA})
           </button>
           <button
             onClick={() => setFilterSource('record_B')}
@@ -77,17 +81,22 @@ export default function TimelineVisualizer({ timeline, aiAnalysis }) {
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            RECORD B (7)
+            RECORD B ({countB})
           </button>
         </div>
       </div>
 
       {/* Timeline List */}
-      <div className="space-y-3 relative">
-        {filteredTimeline.map((ev) => {
-          const isRecordA = ev.source_record === 'record_A';
-          const isExactOverlap = ev.is_overlapping;
-          const isNearOverlap = ev.is_near_overlap;
+      {filteredTimeline.length === 0 ? (
+        <div className="p-8 text-center text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl">
+          No clinical encounters found for this patient selection in database.
+        </div>
+      ) : (
+        <div className="space-y-3 relative">
+          {filteredTimeline.map((ev) => {
+            const isRecordA = ev.source_record === 'record_A';
+            const isExactOverlap = ev.is_overlapping;
+            const isNearOverlap = ev.is_near_overlap;
 
           return (
             <div
@@ -169,6 +178,7 @@ export default function TimelineVisualizer({ timeline, aiAnalysis }) {
           );
         })}
       </div>
+      )}
 
       {/* Overlap Detail Modal */}
       {selectedOverlap && (
