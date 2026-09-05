@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, AlertCircle, RefreshCw, Cpu } from 'lucide-react';
+import { Activity, RefreshCw, Cpu } from 'lucide-react';
 import PermanentIdLookupModal from './PermanentIdLookupModal';
 
 export default function Header({ aiStatus, onRefresh, loading }) {
@@ -7,12 +7,6 @@ export default function Header({ aiStatus, onRefresh, loading }) {
 
   return (
     <header className="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-40 shadow-sm">
-      {/* Synthetic Clinical Data Notice Banner */}
-      <div className="bg-amber-50 border-b border-amber-200 px-4 py-1.5 text-center text-amber-800 text-xs font-semibold tracking-wide flex items-center justify-center gap-2">
-        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-        <span>SYNTHETIC CLINICAL DEMO DATA ONLY — NO REAL PATIENT DATA USED</span>
-      </div>
-
       {/* Header Content */}
       <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
