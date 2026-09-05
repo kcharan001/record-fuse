@@ -18,8 +18,19 @@ from app.services.seed_service import get_scenarios_list
 
 router = APIRouter(prefix="/api/reconcile", tags=["Timeline Reconciliation Engine"])
 
-# In-memory approval state for hackathon demo
-CURRENT_APPROVAL_STATUS: Dict[str, str] = {"status": "PENDING"}
+# Per-scenario in-memory approval states for realistic mixed data
+SCENARIO_APPROVAL_STATES: Dict[str, str] = {}
+
+def resolve_scenario_id(patient_a_id: str, patient_b_id: str, scenario_id: Optional[str] = None) -> str:
+    if scenario_id:
+        return scenario_id
+    if patient_a_id == "REC-A" and patient_b_id == "REC-B":
+        return "DEMO"
+    scenarios = get_scenarios_list()
+    sc = next((s for s in scenarios if s["patient_a_id"] == patient_a_id and s["patient_b_id"] == patient_b_id), None)
+    if sc:
+        return sc["scenario_id"]
+    return f"{patient_a_id}_{patient_b_id}"
 
 def resolve_patient_ids(patient_a_id: str, patient_b_id: str, scenario_id: Optional[str] = None):
     if scenario_id:
@@ -28,6 +39,28 @@ def resolve_patient_ids(patient_a_id: str, patient_b_id: str, scenario_id: Optio
         if sc:
             return sc["patient_a_id"], sc["patient_b_id"]
     return patient_a_id, patient_b_id
+
+def get_scenario_approval_status(sc_id: str) -> str:
+    if sc_id in SCENARIO_APPROVAL_STATES:
+        return SCENARIO_APPROVAL_STATES[sc_id]
+
+    scenarios = get_scenarios_list()
+    sc = next((s for s in scenarios if s["scenario_id"] == sc_id), None)
+    if not sc:
+        return "PENDING"
+
+    category = sc.get("category", "")
+    if category in ("demo_dataset", "high_confidence_match"):
+        status_val = "APPROVED"
+    elif category in ("medium_confidence_review", "complex_clinical_overlap"):
+        status_val = "PENDING"
+    elif category == "non_match":
+        status_val = "REJECTED"
+    else:
+        status_val = "PENDING"
+
+    SCENARIO_APPROVAL_STATES[sc_id] = status_val
+    return status_val
 
 @router.post("", response_model=ReconciliationOutputSchema)
 def reconcile_patient_records(
@@ -42,6 +75,7 @@ def reconcile_patient_records(
     and AI semantic context assistance on two patient records.
     Guarantees 100% preservation of all clinical events from both sides.
     """
+    sc_id = resolve_scenario_id(patient_a_id, patient_b_id, scenario_id)
     patient_a_id, patient_b_id = resolve_patient_ids(patient_a_id, patient_b_id, scenario_id)
 
     patient_a_orm = db.query(Patient).filter(Patient.id == patient_a_id).first()
@@ -65,8 +99,8 @@ def reconcile_patient_records(
     reconciler = TimelineReconciler()
     result = reconciler.reconcile(events_a, events_b)
 
-    # Attach current approval status
-    result.approval_status = CURRENT_APPROVAL_STATUS.get("status", "PENDING")
+    # Attach current approval status for this scenario
+    result.approval_status = get_scenario_approval_status(sc_id)
 
     # Machine-checkable zero-loss verification
     verifier = ZeroLossVerifier()
@@ -92,13 +126,17 @@ def set_merge_approval(payload: ApprovalRequestSchema):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Approval status must be 'APPROVED', 'REJECTED', or 'PENDING'."
         )
-    
-    CURRENT_APPROVAL_STATUS["status"] = payload.approval_status
+
+    sc_id = resolve_scenario_id(payload.patient_a_id, payload.patient_b_id, payload.scenario_id)
+    SCENARIO_APPROVAL_STATES[sc_id] = payload.approval_status
+
     return {
-        "message": f"Merge approval status updated to '{payload.approval_status}'.",
+        "message": f"Merge approval status for scenario '{sc_id}' updated to '{payload.approval_status}'.",
+        "scenario_id": sc_id,
         "approval_status": payload.approval_status,
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
+
 
 @router.get("/verification", response_model=VerificationResultSchema)
 def get_verification_proof(

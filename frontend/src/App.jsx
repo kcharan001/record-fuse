@@ -49,11 +49,12 @@ export default function App() {
   const handleApprove = async () => {
     try {
       await apiClient.post('/api/reconcile/approval', {
-        patient_a_id: 'REC-A',
-        patient_b_id: 'REC-B',
+        scenario_id: selectedScenarioId,
+        patient_a_id: recordData?.record_a?.patient?.id || 'REC-A',
+        patient_b_id: recordData?.record_b?.patient?.id || 'REC-B',
         approval_status: 'APPROVED'
       });
-      loadData();
+      loadData(selectedScenarioId);
     } catch (err) {
       alert('Failed to update approval status');
     }
@@ -62,15 +63,17 @@ export default function App() {
   const handleReject = async () => {
     try {
       await apiClient.post('/api/reconcile/approval', {
-        patient_a_id: 'REC-A',
-        patient_b_id: 'REC-B',
+        scenario_id: selectedScenarioId,
+        patient_a_id: recordData?.record_a?.patient?.id || 'REC-A',
+        patient_b_id: recordData?.record_b?.patient?.id || 'REC-B',
         approval_status: 'REJECTED'
       });
-      loadData();
+      loadData(selectedScenarioId);
     } catch (err) {
       alert('Failed to update approval status');
     }
   };
+
 
   const handleExportJSON = () => {
     if (!reconciliation) return;

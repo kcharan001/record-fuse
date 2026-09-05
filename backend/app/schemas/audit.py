@@ -6,8 +6,10 @@ from app.schemas.ai import AIServiceResponseSchema
 class ApprovalRequestSchema(BaseModel):
     patient_a_id: str = Field("REC-A")
     patient_b_id: str = Field("REC-B")
-    approval_status: str = Field(..., json_schema_extra={"example": "APPROVED"}) # "APPROVED" or "REJECTED"
+    scenario_id: Optional[str] = Field(None)
+    approval_status: str = Field(..., json_schema_extra={"example": "APPROVED"}) # "APPROVED" or "REJECTED" or "PENDING"
     reviewer_notes: Optional[str] = Field(None)
+
 
 class AuditTrailSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
