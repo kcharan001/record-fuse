@@ -15,6 +15,7 @@ export default function PatientRegistrationForm({ onPatientSaved }) {
 
   const [includeEvent, setIncludeEvent] = useState(true);
   const [eventData, setEventData] = useState({
+    source_record: 'record_A',
     event_type: 'consultation',
     description: '',
     provider: '',
@@ -53,7 +54,7 @@ export default function PatientRegistrationForm({ onPatientSaved }) {
       if (includeEvent && eventData.description.trim()) {
         await addClinicalEvent({
           patient_id: patResult.patient.id,
-          source_record: 'record_A',
+          source_record: eventData.source_record || 'record_A',
           event_type: eventData.event_type,
           description: eventData.description,
           provider: eventData.provider || 'Staff Physician',
@@ -235,7 +236,20 @@ export default function PatientRegistrationForm({ onPatientSaved }) {
           </div>
 
           {includeEvent && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800/60">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800/60">
+              <div>
+                <label className="block text-xs font-semibold text-indigo-400 mb-1">Record Provenance *</label>
+                <select
+                  name="source_record"
+                  value={eventData.source_record}
+                  onChange={handleEventChange}
+                  className="w-full bg-slate-900 border border-indigo-500/50 rounded-xl px-3 py-2 text-sm text-indigo-200 focus:outline-none focus:border-indigo-400 font-semibold"
+                >
+                  <option value="record_A">Record A (Primary)</option>
+                  <option value="record_B">Record B (Secondary)</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-400 mb-1">Encounter Type</label>
                 <select
@@ -277,7 +291,7 @@ export default function PatientRegistrationForm({ onPatientSaved }) {
                 />
               </div>
 
-              <div className="md:col-span-3">
+              <div className="md:col-span-4">
                 <label className="block text-xs font-semibold text-slate-400 mb-1">Clinical Notes / Description</label>
                 <input
                   type="text"

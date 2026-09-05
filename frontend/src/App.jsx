@@ -227,6 +227,7 @@ export default function App() {
             <TimelineVisualizer
               timeline={reconciliation?.timeline}
               aiAnalysis={reconciliation?.ai_analysis}
+              onRefresh={loadData}
             />
 
             {/* Read-Only Audit Trail Card */}

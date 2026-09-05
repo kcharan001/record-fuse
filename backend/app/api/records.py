@@ -128,6 +128,25 @@ def add_clinical_event(payload: ClinicalEventCreateSchema, db: Session = Depends
 
     return parse_event_metadata(new_event)
 
+@router.patch("/event/{event_id}", response_model=ClinicalEventSchema)
+def update_clinical_event(event_id: str, source_record: Optional[str] = None, db: Session = Depends(get_db)):
+    """
+    Updates the source record provenance (record_A vs record_B) of an existing clinical event.
+    """
+    ev = db.query(ClinicalEvent).filter(ClinicalEvent.event_id == event_id).first()
+    if not ev:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Clinical event '{event_id}' not found."
+        )
+
+    if source_record:
+        ev.source_record = source_record
+
+    db.commit()
+    db.refresh(ev)
+    return parse_event_metadata(ev)
+
 @router.get("/database")
 def get_master_database_directory(db: Session = Depends(get_db)):
     """

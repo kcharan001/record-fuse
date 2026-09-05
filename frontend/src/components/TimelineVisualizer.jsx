@@ -1,9 +1,28 @@
 import React, { useState } from 'react';
-import { GitCommit, Layers, Clock, Building2, User, HelpCircle, X } from 'lucide-react';
+import { GitCommit, Layers, Clock, Building2, User, HelpCircle, X, RefreshCw } from 'lucide-react';
+import { apiClient } from '../services/api';
 
-export default function TimelineVisualizer({ timeline, aiAnalysis }) {
+export default function TimelineVisualizer({ timeline, aiAnalysis, onRefresh }) {
   const [filterSource, setFilterSource] = useState('ALL'); // 'ALL', 'record_A', 'record_B'
   const [selectedOverlap, setSelectedOverlap] = useState(null);
+  const [togglingEventId, setTogglingEventId] = useState(null);
+
+  const handleToggleProvenance = async (e, ev) => {
+    e.stopPropagation();
+    const newRecord = ev.source_record === 'record_A' ? 'record_B' : 'record_A';
+    setTogglingEventId(ev.original_event_id);
+    try {
+      await apiClient.patch(`/api/records/event/${ev.original_event_id}?source_record=${newRecord}`);
+      if (onRefresh) {
+        await onRefresh();
+      }
+    } catch (err) {
+      console.error('Failed to toggle event provenance:', err);
+      alert('Failed to update event record provenance.');
+    } finally {
+      setTogglingEventId(null);
+    }
+  };
 
   const totalCount = (timeline || []).length;
   const countA = (timeline || []).filter(e => e.source_record === 'record_A').length;
@@ -127,16 +146,22 @@ export default function TimelineVisualizer({ timeline, aiAnalysis }) {
                       <span className="text-slate-500">|</span>
                       <span className="font-bold text-slate-100">{ev.original_event_id}</span>
 
-                      {/* Source Record Badge */}
-                      {isRecordA ? (
-                        <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded text-[10px] font-bold">
-                          Record A
-                        </span>
-                      ) : (
-                        <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded text-[10px] font-bold">
-                          Record B
-                        </span>
-                      )}
+                      {/* Source Record Badge (Interactive Toggle) */}
+                      <button
+                        onClick={(e) => handleToggleProvenance(e, ev)}
+                        disabled={togglingEventId === ev.original_event_id}
+                        title={`Click to switch this encounter provenance to ${isRecordA ? 'Record B' : 'Record A'}`}
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-all flex items-center gap-1 cursor-pointer hover:scale-105 ${
+                          isRecordA
+                            ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 hover:bg-indigo-500/30'
+                            : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+                        }`}
+                      >
+                        {togglingEventId === ev.original_event_id ? (
+                          <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                        ) : null}
+                        <span>{isRecordA ? 'Record A' : 'Record B'}</span>
+                      </button>
 
                       {/* Overlap Badges */}
                       {isExactOverlap && (
