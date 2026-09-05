@@ -10,6 +10,21 @@ export const apiClient = axios.create({
   timeout: 10000,
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if ((error.response?.status === 405 || error.response?.status === 404 || !error.response) && originalRequest && !originalRequest._retry) {
+      originalRequest._retry = true;
+      const currentUrl = originalRequest.baseURL || API_BASE_URL;
+      const fallbackUrl = currentUrl.includes('8002') ? 'http://localhost:8001' : 'http://localhost:8002';
+      originalRequest.baseURL = fallbackUrl;
+      return axios(originalRequest);
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const fetchHealth = async () => {
   try {
     const response = await apiClient.get('/health');
