@@ -113,32 +113,39 @@ def get_scenarios_list():
         })
     return scenarios
 
-def seed_database(db: Session):
+def seed_database(db: Session, force_reset: bool = False):
     """
-    Cleans and seeds the database with synthetic duplicate-pair scenarios (1 Demo + 8 Expanded).
+    Seeds the database with synthetic duplicate-pair scenarios (1 Demo + 8 Expanded).
+    Preserves all user-added patients and custom clinical events unless force_reset is explicitly True.
     """
-    # Delete existing data to guarantee clean idempotent reset
-    db.query(ClinicalEvent).delete()
-    db.query(Patient).delete()
-    db.commit()
+    if force_reset:
+        db.query(ClinicalEvent).delete()
+        db.query(Patient).delete()
+        db.commit()
 
-    # 1. Insert DEMO Patients & Events
+    # 1. Insert DEMO Patients & Events if missing
     for p_data in SYNTHETIC_PATIENTS:
-        patient = Patient(**p_data)
-        db.add(patient)
+        if not db.query(Patient).filter(Patient.id == p_data["id"]).first():
+            patient = Patient(**p_data)
+            db.add(patient)
     for e_data in SYNTHETIC_EVENTS:
-        event = ClinicalEvent(**e_data)
-        db.add(event)
+        if not db.query(ClinicalEvent).filter(ClinicalEvent.event_id == e_data["event_id"]).first():
+            event = ClinicalEvent(**e_data)
+            db.add(event)
     db.commit()
 
-    # 2. Insert 8 Expanded Scenarios Patients & Events
+    # 2. Insert 8 Expanded Scenarios Patients & Events if missing
     for sc in EXPANDED_SCENARIOS:
-        db.add(Patient(**sc["patient_a"]))
-        db.add(Patient(**sc["patient_b"]))
+        if not db.query(Patient).filter(Patient.id == sc["patient_a"]["id"]).first():
+            db.add(Patient(**sc["patient_a"]))
+        if not db.query(Patient).filter(Patient.id == sc["patient_b"]["id"]).first():
+            db.add(Patient(**sc["patient_b"]))
         for e_data in sc["events_a"]:
-            db.add(ClinicalEvent(**e_data))
+            if not db.query(ClinicalEvent).filter(ClinicalEvent.event_id == e_data["event_id"]).first():
+                db.add(ClinicalEvent(**e_data))
         for e_data in sc["events_b"]:
-            db.add(ClinicalEvent(**e_data))
+            if not db.query(ClinicalEvent).filter(ClinicalEvent.event_id == e_data["event_id"]).first():
+                db.add(ClinicalEvent(**e_data))
     db.commit()
 
     count_a = db.query(ClinicalEvent).filter(ClinicalEvent.source_record == "record_A").count()

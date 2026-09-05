@@ -188,9 +188,9 @@ def clear_all_records(db: Session = Depends(get_db)):
 @router.post("/seed", response_model=SeedDataResponse)
 def seed_records(db: Session = Depends(get_db)):
     """
-    Idempotently clears and populates SQLite DB with synthetic demonstration data and scenarios.
+    Populates SQLite DB with synthetic demonstration data while preserving custom user patient entries.
     """
-    result = seed_database(db)
+    result = seed_database(db, force_reset=False)
     return SeedDataResponse(**result)
 
 @router.get("/scenarios")
