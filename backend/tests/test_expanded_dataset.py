@@ -2,11 +2,11 @@ import pytest
 from app.services.expanded_dataset import EXPANDED_SCENARIOS
 
 def test_scenarios_list_endpoint(client):
-    """Verify GET /api/records/scenarios returns all 21 scenarios (DEMO + S01..S20)."""
+    """Verify GET /api/records/scenarios returns all 9 scenarios (DEMO + S01..S08)."""
     response = client.get("/api/records/scenarios")
     assert response.status_code == 200
     scenarios = response.json()
-    assert len(scenarios) == 21
+    assert len(scenarios) == 9
     
     demo_sc = next((s for s in scenarios if s["scenario_id"] == "DEMO"), None)
     assert demo_sc is not None
@@ -19,11 +19,12 @@ def test_scenarios_list_endpoint(client):
     assert s01_sc["category"] == "high_confidence_match"
     assert s01_sc["patient_a_id"] == "S01-REC-A"
 
-def test_all_20_scenarios_zero_loss_verification(client):
+def test_all_expanded_scenarios_zero_loss_verification(client):
     """
     Core Zero-Loss Guarantee Test:
-    Executes timeline reconciliation across ALL 20 expanded scenarios.
+    Executes timeline reconciliation across ALL expanded scenarios (S01..S08).
     Asserts zero data loss: N_A + N_B == N_reconciled, missing_event_ids == [], lost_events_count == 0.
+    Asserts each scenario has at least 6 events total.
     """
     for sc in EXPANDED_SCENARIOS:
         sc_id = sc["scenario_id"]
@@ -35,6 +36,7 @@ def test_all_20_scenarios_zero_loss_verification(client):
         expected_count_b = len(sc["events_b"])
         expected_total = expected_count_a + expected_count_b
 
+        assert expected_total >= 6, f"{sc_id} must have at least 6 events total"
         assert data["record_a_count"] == expected_count_a, f"{sc_id}: record_a_count mismatch"
         assert data["record_b_count"] == expected_count_b, f"{sc_id}: record_b_count mismatch"
         assert data["total_events"] == expected_total, f"{sc_id}: total_events mismatch"
@@ -49,9 +51,9 @@ def test_all_20_scenarios_zero_loss_verification(client):
         assert v["provenance_intact"] is True, f"{sc_id}: provenance_intact must be True"
 
 def test_high_confidence_scenarios_ai_matching(client):
-    """Verify S01-S05 (High Confidence Matches) produce match_confidence >= 0.70 and is_match = True."""
+    """Verify S01-S02 (High Confidence Matches) produce match_confidence >= 0.70 and is_match = True."""
     high_conf_scenarios = [sc for sc in EXPANDED_SCENARIOS if sc["category"] == "high_confidence_match"]
-    assert len(high_conf_scenarios) == 5
+    assert len(high_conf_scenarios) == 2
 
     for sc in high_conf_scenarios:
         sc_id = sc["scenario_id"]
@@ -64,9 +66,9 @@ def test_high_confidence_scenarios_ai_matching(client):
         assert p_match["is_match"] is True, f"{sc_id} expected is_match=True"
 
 def test_non_match_scenarios_ai_matching(client):
-    """Verify S16-S20 (Non-Matches) produce low confidence and is_match = False."""
+    """Verify S07-S08 (Non-Matches) produce low confidence and is_match = False."""
     non_match_scenarios = [sc for sc in EXPANDED_SCENARIOS if sc["category"] == "non_match"]
-    assert len(non_match_scenarios) == 5
+    assert len(non_match_scenarios) == 2
 
     for sc in non_match_scenarios:
         sc_id = sc["scenario_id"]
@@ -88,4 +90,5 @@ def test_scenario_record_fetching(client):
     assert data["record_a"]["patient"]["first_name"] == "Jonathan"
     assert data["record_b"]["patient"]["id"] == "S01-REC-B"
     assert data["record_b"]["patient"]["first_name"] == "John"
-    assert data["total_events"] == 10
+    assert data["total_events"] == 8
+

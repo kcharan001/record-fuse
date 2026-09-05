@@ -48,7 +48,7 @@ export default function ScenarioSelector({ selectedScenarioId, onSelectScenario 
           </div>
           <div>
             <h3 className="font-bold text-slate-100 text-sm">Synthetic Patient Dataset Scenarios</h3>
-            <p className="text-xs text-slate-400">Select from 21 realistic duplicate-pair scenarios across 4 clinical categories</p>
+            <p className="text-xs text-slate-400">Select from curated duplicate-pair scenarios (2 per case category, min 6 events each)</p>
           </div>
         </div>
 
@@ -61,28 +61,28 @@ export default function ScenarioSelector({ selectedScenarioId, onSelectScenario 
             className="bg-slate-950 text-slate-200 text-sm font-medium border border-slate-700 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
           >
             <option value="DEMO">Demo: Jonathan Doe vs John Doe (13 Events)</option>
-            <optgroup label="High-Confidence Matches (S01 - S05)">
+            <optgroup label="Case 1: High-Confidence Matches (S01 - S02)">
               {scenarios.filter(s => s.category === 'high_confidence_match').map(s => (
                 <option key={s.scenario_id} value={s.scenario_id}>
                   {s.scenario_id}: {s.title} ({s.total_events} events)
                 </option>
               ))}
             </optgroup>
-            <optgroup label="Medium-Confidence Review Required (S06 - S10)">
+            <optgroup label="Case 2: Medium-Confidence Review Required (S03 - S04)">
               {scenarios.filter(s => s.category === 'medium_confidence_review').map(s => (
                 <option key={s.scenario_id} value={s.scenario_id}>
                   {s.scenario_id}: {s.title} ({s.total_events} events)
                 </option>
               ))}
             </optgroup>
-            <optgroup label="Complex Clinical Overlaps (S11 - S15)">
+            <optgroup label="Case 3: Complex Clinical Overlaps (S05 - S06)">
               {scenarios.filter(s => s.category === 'complex_clinical_overlap').map(s => (
                 <option key={s.scenario_id} value={s.scenario_id}>
                   {s.scenario_id}: {s.title} ({s.total_events} events)
                 </option>
               ))}
             </optgroup>
-            <optgroup label="Non-Match Cases (S16 - S20)">
+            <optgroup label="Case 4: Non-Match Cases (S07 - S08)">
               {scenarios.filter(s => s.category === 'non_match').map(s => (
                 <option key={s.scenario_id} value={s.scenario_id}>
                   {s.scenario_id}: {s.title} ({s.total_events} events)
@@ -90,6 +90,7 @@ export default function ScenarioSelector({ selectedScenarioId, onSelectScenario 
               ))}
             </optgroup>
           </select>
+
         </div>
       </div>
 
