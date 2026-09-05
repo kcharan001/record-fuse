@@ -12,7 +12,7 @@ def test_scenarios_list_endpoint(client):
     assert demo_sc is not None
     assert demo_sc["patient_a_id"] == "REC-A"
     assert demo_sc["patient_b_id"] == "REC-B"
-    assert demo_sc["total_events"] == 13
+    assert demo_sc["total_events"] == 4
 
     s01_sc = next((s for s in scenarios if s["scenario_id"] == "S01"), None)
     assert s01_sc is not None
@@ -24,7 +24,7 @@ def test_all_expanded_scenarios_zero_loss_verification(client):
     Core Zero-Loss Guarantee Test:
     Executes timeline reconciliation across ALL expanded scenarios (S01..S08).
     Asserts zero data loss: N_A + N_B == N_reconciled, missing_event_ids == [], lost_events_count == 0.
-    Asserts each scenario has at least 6 events total.
+    Asserts each scenario has exactly 4 events total (2 per record).
     """
     for sc in EXPANDED_SCENARIOS:
         sc_id = sc["scenario_id"]
@@ -36,7 +36,7 @@ def test_all_expanded_scenarios_zero_loss_verification(client):
         expected_count_b = len(sc["events_b"])
         expected_total = expected_count_a + expected_count_b
 
-        assert expected_total >= 6, f"{sc_id} must have at least 6 events total"
+        assert expected_total == 4, f"{sc_id} must have exactly 4 events total"
         assert data["record_a_count"] == expected_count_a, f"{sc_id}: record_a_count mismatch"
         assert data["record_b_count"] == expected_count_b, f"{sc_id}: record_b_count mismatch"
         assert data["total_events"] == expected_total, f"{sc_id}: total_events mismatch"
@@ -90,5 +90,5 @@ def test_scenario_record_fetching(client):
     assert data["record_a"]["patient"]["first_name"] == "Jonathan"
     assert data["record_b"]["patient"]["id"] == "S01-REC-B"
     assert data["record_b"]["patient"]["first_name"] == "John"
-    assert data["total_events"] == 8
+    assert data["total_events"] == 4
 

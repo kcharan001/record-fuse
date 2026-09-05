@@ -54,8 +54,8 @@ class IntegrityTester:
         # 1. Normal Merge
         proof1 = verifier.verify(events_a, events_b, base_reconcile.timeline)
         scenarios.append(IntegrityScenarioResultSchema(
-            scenario_name="Normal 13-Event Merge",
-            description="Reconciles 6 + 7 events. Asserts 13 preserved events.",
+            scenario_name="Normal 4-Event Merge",
+            description="Reconciles 2 + 2 events. Asserts 4 preserved events.",
             expected_status="PASS",
             actual_status=proof1.status,
             passed=(proof1.status == "PASS"),
@@ -74,12 +74,12 @@ class IntegrityTester:
             details={"missing_event_ids": proof2.missing_event_ids, "lost_events_count": proof2.lost_events_count}
         ))
 
-        # 3. Two Events Removal (A-002, B-005)
-        timeline_corrupt2 = [e for e in base_reconcile.timeline if e.original_event_id not in ("A-002", "B-005")]
+        # 3. Two Events Removal (A-002, B-002)
+        timeline_corrupt2 = [e for e in base_reconcile.timeline if e.original_event_id not in ("A-002", "B-002")]
         proof3 = verifier.verify(events_a, events_b, timeline_corrupt2)
         scenarios.append(IntegrityScenarioResultSchema(
-            scenario_name="Multiple Event Loss Detection (A-002, B-005)",
-            description="Artificially removes A-002 and B-005. Asserts lost_events_count == 2 and status == FAIL.",
+            scenario_name="Multiple Event Loss Detection (A-002, B-002)",
+            description="Artificially removes A-002 and B-002. Asserts lost_events_count == 2 and status == FAIL.",
             expected_status="FAIL",
             actual_status=proof3.status,
             passed=(proof3.status == "FAIL" and proof3.lost_events_count == 2),

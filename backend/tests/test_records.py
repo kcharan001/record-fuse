@@ -5,16 +5,16 @@ def test_seed_endpoint(client):
     data = response.json()
     assert data["patient_count"] == 18
     assert data["scenarios_count"] == 9
-    assert data["record_a_events"] == 32
-    assert data["record_b_events"] == 33
-    assert data["total_events"] == 65
+    assert data["record_a_events"] == 18
+    assert data["record_b_events"] == 18
+    assert data["total_events"] == 36
 
 
 
 
 
 def test_get_all_records_structure(client):
-    """Verify GET /api/records returns Record A (6) and Record B (7)."""
+    """Verify GET /api/records returns Record A (2) and Record B (2)."""
     response = client.get("/api/records")
     assert response.status_code == 200
     data = response.json()
@@ -23,17 +23,17 @@ def test_get_all_records_structure(client):
     rec_b = data["record_b"]
 
     assert rec_a["patient"]["id"] == "REC-A"
-    assert rec_a["event_count"] == 6
-    assert len(rec_a["events"]) == 6
+    assert rec_a["event_count"] == 2
+    assert len(rec_a["events"]) == 2
 
     assert rec_b["patient"]["id"] == "REC-B"
-    assert rec_b["event_count"] == 7
-    assert len(rec_b["events"]) == 7
+    assert rec_b["event_count"] == 2
+    assert len(rec_b["events"]) == 2
 
-    assert data["total_events"] == 13
+    assert data["total_events"] == 4
 
 def test_event_id_uniqueness_and_provenance(client):
-    """Verify all 13 event IDs are unique and retain source provenance."""
+    """Verify all 4 event IDs are unique and retain source provenance."""
     response = client.get("/api/records")
     assert response.status_code == 200
     data = response.json()
@@ -42,12 +42,12 @@ def test_event_id_uniqueness_and_provenance(client):
     events_b = data["record_b"]["events"]
     all_events = events_a + events_b
 
-    # Rule 1: 13 Total Events
-    assert len(all_events) == 13
+    # Rule 1: 4 Total Events
+    assert len(all_events) == 4
 
-    # Rule 2: All 13 IDs are unique
+    # Rule 2: All 4 IDs are unique
     event_ids = [e["event_id"] for e in all_events]
-    assert len(set(event_ids)) == 13
+    assert len(set(event_ids)) == 4
 
     # Rule 3: Provenance assertion
     for e in events_a:
@@ -72,13 +72,13 @@ def test_get_single_record_by_id(client):
     assert resp_a.status_code == 200
     data_a = resp_a.json()
     assert data_a["patient"]["first_name"] == "Jonathan"
-    assert data_a["event_count"] == 6
+    assert data_a["event_count"] == 2
 
     resp_b = client.get("/api/records/REC-B")
     assert resp_b.status_code == 200
     data_b = resp_b.json()
     assert data_b["patient"]["first_name"] == "John"
-    assert data_b["event_count"] == 7
+    assert data_b["event_count"] == 2
 
 def test_nonexistent_record_returns_404(client):
     """Verify 404 for invalid record ID."""

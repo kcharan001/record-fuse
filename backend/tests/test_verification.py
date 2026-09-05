@@ -28,7 +28,7 @@ def synthetic_records():
     return events_a, events_b
 
 def test_happy_path_verification_pass(synthetic_records):
-    """Happy Path: Normal 13-event merge must yield PASS with lost_events_count == 0."""
+    """Happy Path: Normal 4-event merge must yield PASS with lost_events_count == 0."""
     events_a, events_b = synthetic_records
     reconciler = TimelineReconciler()
     result = reconciler.reconcile(events_a, events_b)
@@ -37,8 +37,8 @@ def test_happy_path_verification_pass(synthetic_records):
     v_result = verifier.verify(events_a, events_b, result.timeline)
 
     assert v_result.status == "PASS"
-    assert v_result.expected_total == 13
-    assert v_result.actual_total == 13
+    assert v_result.expected_total == 4
+    assert v_result.actual_total == 4
     assert v_result.lost_events_count == 0
     assert v_result.missing_event_ids == []
     assert v_result.duplicate_event_ids == []
@@ -58,30 +58,30 @@ def test_adversarial_one_missing_event_reports_lost_count_1(synthetic_records):
     v_result = verifier.verify(events_a, events_b, corrupted_timeline)
 
     assert v_result.status == "FAIL"
-    assert v_result.expected_total == 13
-    assert v_result.actual_total == 12
+    assert v_result.expected_total == 4
+    assert v_result.actual_total == 3
     assert v_result.missing_event_ids == ["A-002"]
     assert v_result.lost_events_count == 1
 
 def test_adversarial_two_missing_events_reports_lost_count_2(synthetic_records):
-    """ADVERSARIAL: Removing events A-002 and B-005 MUST yield lost_events_count == 2 and FAIL."""
+    """ADVERSARIAL: Removing events A-002 and B-002 MUST yield lost_events_count == 2 and FAIL."""
     events_a, events_b = synthetic_records
     reconciler = TimelineReconciler()
     result = reconciler.reconcile(events_a, events_b)
 
-    # Corrupt timeline by dropping A-002 and B-005
+    # Corrupt timeline by dropping A-002 and B-002
     corrupted_timeline = [
         e for e in result.timeline 
-        if e.original_event_id not in ("A-002", "B-005")
+        if e.original_event_id not in ("A-002", "B-002")
     ]
 
     verifier = ZeroLossVerifier()
     v_result = verifier.verify(events_a, events_b, corrupted_timeline)
 
     assert v_result.status == "FAIL"
-    assert v_result.expected_total == 13
-    assert v_result.actual_total == 11
-    assert v_result.missing_event_ids == ["A-002", "B-005"]
+    assert v_result.expected_total == 4
+    assert v_result.actual_total == 2
+    assert v_result.missing_event_ids == ["A-002", "B-002"]
     assert v_result.lost_events_count == 2
 
 def test_adversarial_duplicate_event_does_not_increase_lost_events_count(synthetic_records):
@@ -98,8 +98,8 @@ def test_adversarial_duplicate_event_does_not_increase_lost_events_count(synthet
     v_result = verifier.verify(events_a, events_b, corrupted_timeline)
 
     assert v_result.status == "FAIL"
-    assert v_result.expected_total == 13
-    assert v_result.actual_total == 14
+    assert v_result.expected_total == 4
+    assert v_result.actual_total == 5
     assert v_result.missing_event_ids == []
     assert v_result.duplicate_event_ids == ["A-001"]
     assert v_result.lost_events_count == 0 # Problem is duplication, not event loss
@@ -159,7 +159,7 @@ def test_verification_api_endpoint(client):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "PASS"
-    assert data["expected_total"] == 13
-    assert data["actual_total"] == 13
+    assert data["expected_total"] == 4
+    assert data["actual_total"] == 4
     assert data["lost_events_count"] == 0
     assert data["missing_event_ids"] == []

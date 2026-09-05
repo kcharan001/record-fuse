@@ -62,7 +62,7 @@ def test_forced_fallback_mode(ai_test_data):
     assert len(result.overlap_analyses) >= 1
 
 def test_ai_analysis_does_not_alter_timeline_events_or_ids(ai_test_data):
-    """ASSERTION: AI analysis output does NOT alter original timeline IDs or total count (13)."""
+    """ASSERTION: AI analysis output does NOT alter original timeline IDs or total count (4)."""
     patient_a, patient_b, reconciliation_result = ai_test_data
     ai_service = AIService()
 
@@ -75,7 +75,7 @@ def test_ai_analysis_does_not_alter_timeline_events_or_ids(ai_test_data):
     # Re-verify deterministic reconciliation invariants after AI service invocation
     assert reconciliation_result.total_events == original_count
     assert reconciliation_result.preserved_event_ids == original_ids
-    assert len(reconciliation_result.timeline) == 13
+    assert len(reconciliation_result.timeline) == 4
 
 def test_verification_remains_independent_and_authoritative(ai_test_data):
     """ASSERTION: Verification engine independently asserts PASS/FAIL regardless of AI."""

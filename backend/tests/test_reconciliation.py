@@ -30,34 +30,34 @@ def sample_synthetic_events():
 
 def test_reconciliation_event_counts_and_zero_loss(sample_synthetic_events):
     """
-    ASSERTION: 6 (Record A) + 7 (Record B) = 13 Events.
+    ASSERTION: 2 (Record A) + 2 (Record B) = 4 Events.
     Zero original clinical events dropped.
     """
     events_a, events_b = sample_synthetic_events
     reconciler = TimelineReconciler()
     output = reconciler.reconcile(events_a, events_b)
 
-    assert output.record_a_count == 6
-    assert output.record_b_count == 7
-    assert output.total_events == 13
-    assert len(output.timeline) == 13
+    assert output.record_a_count == 2
+    assert output.record_b_count == 2
+    assert output.total_events == 4
+    assert len(output.timeline) == 4
 
 def test_all_original_event_ids_preserved(sample_synthetic_events):
     """
-    ASSERTION: Every ID A-001..A-006 and B-001..B-007 exists in final merged timeline.
+    ASSERTION: Every ID A-001..A-002 and B-001..B-002 exists in final merged timeline.
     """
     events_a, events_b = sample_synthetic_events
     reconciler = TimelineReconciler()
     output = reconciler.reconcile(events_a, events_b)
 
-    expected_ids_a = {f"A-00{i}" for i in range(1, 7)}
-    expected_ids_b = {f"B-00{i}" for i in range(1, 8)}
+    expected_ids_a = {f"A-00{i}" for i in range(1, 3)}
+    expected_ids_b = {f"B-00{i}" for i in range(1, 3)}
     expected_all = expected_ids_a | expected_ids_b
 
     actual_ids = set(output.preserved_event_ids)
 
     assert actual_ids == expected_all
-    assert len(actual_ids) == 13
+    assert len(actual_ids) == 4
 
 def test_exact_timestamp_overlap_preservation(sample_synthetic_events):
     """

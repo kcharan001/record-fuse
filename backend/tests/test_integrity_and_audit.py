@@ -57,7 +57,7 @@ def test_audit_trail_api_endpoint(client):
     data = resp.json()
 
     assert data["reconciliation_id"] == "RECON-REC-A-REC-B"
-    assert data["total_events"] == 13
+    assert data["total_events"] == 4
     assert data["lost_events_count"] == 0
     assert data["verification_status"] == "PASS"
 
@@ -76,16 +76,16 @@ def test_verifier_bug_fix_regressions(synthetic_records_local):
     # 1. One event removed (A-002)
     t1 = [e for e in result.timeline if e.original_event_id != "A-002"]
     p1 = verifier.verify(events_a, events_b, t1)
-    assert p1.actual_total == 12
+    assert p1.actual_total == 3
     assert p1.missing_event_ids == ["A-002"]
     assert p1.lost_events_count == 1
     assert p1.status == "FAIL"
 
-    # 2. Two events removed (A-002, B-005)
-    t2 = [e for e in result.timeline if e.original_event_id not in ("A-002", "B-005")]
+    # 2. Two events removed (A-002, B-002)
+    t2 = [e for e in result.timeline if e.original_event_id not in ("A-002", "B-002")]
     p2 = verifier.verify(events_a, events_b, t2)
-    assert p2.actual_total == 11
-    assert p2.missing_event_ids == ["A-002", "B-005"]
+    assert p2.actual_total == 2
+    assert p2.missing_event_ids == ["A-002", "B-002"]
     assert p2.lost_events_count == 2
     assert p2.status == "FAIL"
 
@@ -93,7 +93,7 @@ def test_verifier_bug_fix_regressions(synthetic_records_local):
     t3 = list(result.timeline)
     t3.append(result.timeline[0])
     p3 = verifier.verify(events_a, events_b, t3)
-    assert p3.actual_total == 14
+    assert p3.actual_total == 5
     assert p3.duplicate_event_ids == ["A-001"]
     assert p3.missing_event_ids == []
     assert p3.lost_events_count == 0

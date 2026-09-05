@@ -21,8 +21,8 @@ def test_lookup_patient_by_permanent_id(client):
     assert len(data["linked_record_ids"]) == 2
     assert "REC-A" in data["linked_record_ids"]
     assert "REC-B" in data["linked_record_ids"]
-    assert data["total_visits_count"] == 13
-    assert len(data["medical_history_timeline"]) == 13
+    assert data["total_visits_count"] == 4
+    assert len(data["medical_history_timeline"]) == 4
 
 def test_lookup_patient_by_ssn(client):
     """Verify GET /api/records/lookup/{ssn_last4} retrieves patient profile via SSN."""
@@ -32,4 +32,4 @@ def test_lookup_patient_by_ssn(client):
 
     assert data["permanent_patient_id"] == "UPI-1982-4892-DOE"
     assert data["patient"]["ssn_last4"] == "4892"
-    assert data["total_visits_count"] == 13
+    assert data["total_visits_count"] == 4
