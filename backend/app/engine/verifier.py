@@ -76,13 +76,14 @@ class ZeroLossVerifier:
 
         # Count frequencies for duplicate detection
         counts = Counter(merged_id_list)
-        duplicate_event_ids = sorted([event_id for event_id, freq in counts.items() if freq > 1])
+        duplicate_event_ids = sorted(list({event_id for event_id, freq in counts.items() if freq > 1}))
 
-        # Detect missing IDs
+        # Detect missing IDs (unique list of original IDs not found in merged output)
         missing_event_ids = sorted(list(all_original_ids - set(merged_id_list)))
 
-        # Calculate lost event metrics
-        lost_events_count = len(missing_event_ids) + max(0, expected_total - actual_total)
+        # FIXED: lost_events_count represents exactly the number of unique missing original event IDs
+        lost_events_count = len(missing_event_ids)
+
         provenance_intact = (len(invalid_provenance_ids) == 0)
 
         # Strict Pass/Fail Evaluation

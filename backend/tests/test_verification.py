@@ -28,7 +28,7 @@ def synthetic_records():
     return events_a, events_b
 
 def test_happy_path_verification_pass(synthetic_records):
-    """Happy Path: Normal 13-event merge must yield PASS with 0 lost events."""
+    """Happy Path: Normal 13-event merge must yield PASS with lost_events_count == 0."""
     events_a, events_b = synthetic_records
     reconciler = TimelineReconciler()
     result = reconciler.reconcile(events_a, events_b)
@@ -45,8 +45,8 @@ def test_happy_path_verification_pass(synthetic_records):
     assert v_result.invalid_provenance_event_ids == []
     assert v_result.provenance_intact is True
 
-def test_adversarial_missing_record_a_event_causes_fail(synthetic_records):
-    """ADVERSARIAL: Removing event A-002 from merged timeline MUST yield FAIL."""
+def test_adversarial_one_missing_event_reports_lost_count_1(synthetic_records):
+    """ADVERSARIAL: Removing event A-002 MUST yield lost_events_count == 1 and FAIL."""
     events_a, events_b = synthetic_records
     reconciler = TimelineReconciler()
     result = reconciler.reconcile(events_a, events_b)
@@ -58,34 +58,39 @@ def test_adversarial_missing_record_a_event_causes_fail(synthetic_records):
     v_result = verifier.verify(events_a, events_b, corrupted_timeline)
 
     assert v_result.status == "FAIL"
+    assert v_result.expected_total == 13
     assert v_result.actual_total == 12
-    assert "A-002" in v_result.missing_event_ids
-    assert v_result.lost_events_count >= 1
+    assert v_result.missing_event_ids == ["A-002"]
+    assert v_result.lost_events_count == 1
 
-def test_adversarial_missing_record_b_event_causes_fail(synthetic_records):
-    """ADVERSARIAL: Removing event B-005 from merged timeline MUST yield FAIL."""
+def test_adversarial_two_missing_events_reports_lost_count_2(synthetic_records):
+    """ADVERSARIAL: Removing events A-002 and B-005 MUST yield lost_events_count == 2 and FAIL."""
     events_a, events_b = synthetic_records
     reconciler = TimelineReconciler()
     result = reconciler.reconcile(events_a, events_b)
 
-    # Corrupt timeline by silently dropping B-005
-    corrupted_timeline = [e for e in result.timeline if e.original_event_id != "B-005"]
+    # Corrupt timeline by dropping A-002 and B-005
+    corrupted_timeline = [
+        e for e in result.timeline 
+        if e.original_event_id not in ("A-002", "B-005")
+    ]
 
     verifier = ZeroLossVerifier()
     v_result = verifier.verify(events_a, events_b, corrupted_timeline)
 
     assert v_result.status == "FAIL"
-    assert v_result.actual_total == 12
-    assert "B-005" in v_result.missing_event_ids
-    assert v_result.lost_events_count >= 1
+    assert v_result.expected_total == 13
+    assert v_result.actual_total == 11
+    assert v_result.missing_event_ids == ["A-002", "B-005"]
+    assert v_result.lost_events_count == 2
 
-def test_adversarial_duplicate_event_id_causes_fail(synthetic_records):
-    """ADVERSARIAL: Duplicating event A-001 in merged timeline MUST yield FAIL."""
+def test_adversarial_duplicate_event_does_not_increase_lost_events_count(synthetic_records):
+    """ADVERSARIAL: Duplicating A-001 yields duplicate_event_ids: ['A-001'] but lost_events_count == 0."""
     events_a, events_b = synthetic_records
     reconciler = TimelineReconciler()
     result = reconciler.reconcile(events_a, events_b)
 
-    # Corrupt timeline by appending a duplicate copy of A-001
+    # Append duplicate copy of A-001
     corrupted_timeline = list(result.timeline)
     corrupted_timeline.append(result.timeline[0]) # Duplicate A-001
 
@@ -93,7 +98,29 @@ def test_adversarial_duplicate_event_id_causes_fail(synthetic_records):
     v_result = verifier.verify(events_a, events_b, corrupted_timeline)
 
     assert v_result.status == "FAIL"
-    assert "A-001" in v_result.duplicate_event_ids
+    assert v_result.expected_total == 13
+    assert v_result.actual_total == 14
+    assert v_result.missing_event_ids == []
+    assert v_result.duplicate_event_ids == ["A-001"]
+    assert v_result.lost_events_count == 0 # Problem is duplication, not event loss
+
+def test_adversarial_missing_and_duplicate_combination(synthetic_records):
+    """ADVERSARIAL: Drop A-002 and duplicate A-001 → missing: ['A-002'], duplicate: ['A-001'], lost_count: 1."""
+    events_a, events_b = synthetic_records
+    reconciler = TimelineReconciler()
+    result = reconciler.reconcile(events_a, events_b)
+
+    # Drop A-002 and duplicate A-001
+    corrupted_timeline = [e for e in result.timeline if e.original_event_id != "A-002"]
+    corrupted_timeline.append(result.timeline[0]) # Duplicate A-001
+
+    verifier = ZeroLossVerifier()
+    v_result = verifier.verify(events_a, events_b, corrupted_timeline)
+
+    assert v_result.status == "FAIL"
+    assert v_result.missing_event_ids == ["A-002"]
+    assert v_result.duplicate_event_ids == ["A-001"]
+    assert v_result.lost_events_count == 1 # Exactly len(missing_event_ids)
 
 def test_adversarial_invalid_provenance_causes_fail(synthetic_records):
     """ADVERSARIAL: Mutating source_record of A-001 to 'record_B' MUST yield FAIL."""
@@ -103,7 +130,7 @@ def test_adversarial_invalid_provenance_causes_fail(synthetic_records):
 
     # Corrupt provenance of event A-001
     corrupted_timeline = [e.model_copy(deep=True) for e in result.timeline]
-    corrupted_timeline[0].source_record = "record_B" # A-001 claims to be from record_B
+    corrupted_timeline[0].source_record = "record_B"
 
     verifier = ZeroLossVerifier()
     v_result = verifier.verify(events_a, events_b, corrupted_timeline)
@@ -121,7 +148,6 @@ def test_exact_10am_overlap_preservation_passes_verification(synthetic_records):
     verifier = ZeroLossVerifier()
     v_result = verifier.verify(events_a, events_b, result.timeline)
 
-    # Assert both 10am events exist in output
     ids = [e.original_event_id for e in result.timeline]
     assert "A-002" in ids
     assert "B-002" in ids
