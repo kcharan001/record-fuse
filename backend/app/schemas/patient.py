@@ -12,3 +12,5 @@ class PatientSchema(BaseModel):
     ssn_last4: str = Field(..., json_schema_extra={"example": "4892"})
     phone: Optional[str] = Field(None, json_schema_extra={"example": "555-234-5678"})
     address: Optional[str] = Field(None, json_schema_extra={"example": "742 Evergreen Terrace"})
+    permanent_patient_id: Optional[str] = Field(None, json_schema_extra={"example": "UPI-1982-4892-DOE"})
+

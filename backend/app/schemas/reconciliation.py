@@ -28,6 +28,7 @@ class ReconciliationOutputSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     reconciliation_id: str = Field("RECON-REC-A-REC-B")
+    permanent_patient_id: Optional[str] = Field(None, json_schema_extra={"example": "UPI-1982-4892-DOE"})
     approval_status: str = Field("PENDING", description="'PENDING', 'APPROVED', or 'REJECTED'")
     record_a_count: int
     record_b_count: int
@@ -38,3 +39,4 @@ class ReconciliationOutputSchema(BaseModel):
     timeline: List[MergedTimelineEventSchema]
     verification: Optional[VerificationResultSchema] = None
     ai_analysis: Optional[AIServiceResponseSchema] = None
+

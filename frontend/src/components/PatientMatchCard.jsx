@@ -1,9 +1,14 @@
 import React from 'react';
-import { UserCheck, AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { UserCheck, AlertTriangle, CheckCircle2, QrCode } from 'lucide-react';
 
 export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
   const matchInfo = aiAnalysis?.patient_match;
   const confidencePercent = Math.round((matchInfo?.match_confidence || 0.95) * 100);
+
+  const ssn = patientA?.ssn_last4 || "0000";
+  const last = (patientA?.last_name || "PATIENT").toUpperCase().replace(/\s+/g, "");
+  const year = patientA?.dob ? patientA.dob.split("-")[0] : "2026";
+  const permanentId = `UPI-${year}-${ssn}-${last}`;
 
   return (
     <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6 shadow-xl">
@@ -28,6 +33,21 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
           )}
         </div>
       </div>
+
+      {/* Permanent Master Patient ID Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-xs">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <QrCode className="w-4 h-4 text-indigo-400 shrink-0" />
+          <span className="text-slate-300 font-medium">Permanent Master Patient Identifier (MPI / UPI):</span>
+          <span className="font-mono font-bold text-indigo-200 bg-slate-950 px-2.5 py-1 rounded-lg border border-indigo-500/40 tracking-wider">
+            {permanentId}
+          </span>
+        </div>
+        <span className="text-[11px] text-indigo-300/80 italic">
+          Lifetime master identifier linked to all repeat visits & historical clinical records
+        </span>
+      </div>
+
 
       {/* Side-by-Side Patient Demographics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

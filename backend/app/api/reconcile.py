@@ -62,6 +62,12 @@ def get_scenario_approval_status(sc_id: str) -> str:
     SCENARIO_APPROVAL_STATES[sc_id] = status_val
     return status_val
 
+def generate_permanent_patient_id(patient: PatientSchema) -> str:
+    ssn = patient.ssn_last4 or "0000"
+    last = (patient.last_name or "PATIENT").upper().replace(" ", "")
+    year = patient.dob.split("-")[0] if patient.dob and "-" in patient.dob else "2026"
+    return f"UPI-{year}-{ssn}-{last}"
+
 @router.post("", response_model=ReconciliationOutputSchema)
 def reconcile_patient_records(
     patient_a_id: str = "REC-A",
@@ -90,6 +96,11 @@ def reconcile_patient_records(
     patient_a = PatientSchema.model_validate(patient_a_orm)
     patient_b = PatientSchema.model_validate(patient_b_orm)
 
+    # Generate permanent master unique patient identifier (UPI)
+    upi_id = generate_permanent_patient_id(patient_a)
+    patient_a.permanent_patient_id = upi_id
+    patient_b.permanent_patient_id = upi_id
+
     events_a_orm = db.query(ClinicalEvent).filter(ClinicalEvent.patient_id == patient_a_id).order_by(ClinicalEvent.timestamp.asc()).all()
     events_b_orm = db.query(ClinicalEvent).filter(ClinicalEvent.patient_id == patient_b_id).order_by(ClinicalEvent.timestamp.asc()).all()
 
@@ -99,8 +110,10 @@ def reconcile_patient_records(
     reconciler = TimelineReconciler()
     result = reconciler.reconcile(events_a, events_b)
 
-    # Attach current approval status for this scenario
+    # Attach permanent patient ID & current approval status for this scenario
+    result.permanent_patient_id = upi_id
     result.approval_status = get_scenario_approval_status(sc_id)
+
 
     # Machine-checkable zero-loss verification
     verifier = ZeroLossVerifier()

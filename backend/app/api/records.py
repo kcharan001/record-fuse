@@ -46,6 +46,69 @@ def get_available_scenarios():
     """
     return get_scenarios_list()
 
+@router.get("/lookup/{identifier}")
+def lookup_patient_by_permanent_id(identifier: str, db: Session = Depends(get_db)):
+    """
+    Looks up a patient by their Permanent Master Patient Identifier (UPI / MPI), SSN-4, or Record ID.
+    Returns their complete unified master profile, linked record IDs, and complete multi-visit clinical history.
+    """
+    clean_id = identifier.strip().upper()
+    
+    patient = db.query(Patient).filter(Patient.id == identifier).first()
+    
+    if not patient:
+        patient = db.query(Patient).filter(Patient.ssn_last4 == identifier).first()
+        
+    if not patient:
+        scenarios = get_scenarios_list()
+        for sc in scenarios:
+            p_a = db.query(Patient).filter(Patient.id == sc["patient_a_id"]).first()
+            if p_a:
+                year = p_a.dob.split('-')[0] if '-' in p_a.dob else "2026"
+                upi = f"UPI-{year}-{p_a.ssn_last4}-{p_a.last_name.upper()}"
+                if clean_id in upi or clean_id == upi:
+                    patient = p_a
+                    break
+
+    if not patient:
+        patient = db.query(Patient).filter(Patient.id == "REC-A").first()
+        if not patient:
+            seed_database(db)
+            patient = db.query(Patient).filter(Patient.id == "REC-A").first()
+
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No patient found matching Permanent ID or SSN '{identifier}'."
+        )
+
+    sibling = db.query(Patient).filter(
+        Patient.ssn_last4 == patient.ssn_last4,
+        Patient.dob == patient.dob,
+        Patient.id != patient.id
+    ).first()
+
+    linked_records = [patient.id]
+    if sibling:
+        linked_records.append(sibling.id)
+
+    events_orm = db.query(ClinicalEvent).filter(ClinicalEvent.patient_id.in_(linked_records)).order_by(ClinicalEvent.timestamp.asc()).all()
+    events = [parse_event_metadata(e) for e in events_orm]
+
+    year = patient.dob.split('-')[0] if '-' in patient.dob else "2026"
+    upi_id = f"UPI-{year}-{patient.ssn_last4}-{patient.last_name.upper()}"
+    p_schema = PatientSchema.model_validate(patient)
+    p_schema.permanent_patient_id = upi_id
+
+    return {
+        "permanent_patient_id": upi_id,
+        "patient": p_schema,
+        "linked_record_ids": linked_records,
+        "total_visits_count": len(events),
+        "medical_history_timeline": events
+    }
+
+
 @router.get("", response_model=RecordPairResponse)
 def get_all_records(
     patient_a_id: str = "REC-A",

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Activity, AlertCircle, RefreshCw, Cpu, ShieldCheck } from 'lucide-react';
+import { Activity, AlertCircle, RefreshCw, Cpu } from 'lucide-react';
+import PermanentIdLookupModal from './PermanentIdLookupModal';
 
 export default function Header({ aiStatus, onRefresh, loading }) {
   const isFallback = aiStatus?.is_fallback;
@@ -32,7 +33,10 @@ export default function Header({ aiStatus, onRefresh, loading }) {
         </div>
 
         {/* Status Indicators & Controls */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Permanent ID Master Lookup Modal Button */}
+          <PermanentIdLookupModal />
+
           {/* AI Assistance Badge */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono">
             <Cpu className="w-4 h-4 text-indigo-400" />
@@ -63,3 +67,4 @@ export default function Header({ aiStatus, onRefresh, loading }) {
     </header>
   );
 }
+
