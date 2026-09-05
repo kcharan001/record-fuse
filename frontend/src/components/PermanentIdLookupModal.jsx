@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, X, QrCode, UserCheck, Calendar, Activity, CheckCircle2, FileText, Building2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, X, QrCode, UserCheck, Calendar, Activity, CheckCircle2, FileText, Building2, Minimize2 } from 'lucide-react';
 import { apiClient } from '../services/api';
 
 export default function PermanentIdLookupModal() {
@@ -8,6 +8,16 @@ export default function PermanentIdLookupModal() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
@@ -43,15 +53,32 @@ export default function PermanentIdLookupModal() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsOpen(false);
+          }}
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
           <div className="bg-slate-900 border border-indigo-500/40 rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            {/* Close Button */}
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-100 p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {/* Top Close / Minimize Button */}
+            <div className="flex items-center gap-2 absolute top-4 right-4">
+              <button
+                onClick={() => setIsOpen(false)}
+                title="Minimize / Close Modal"
+                className="flex items-center gap-1 text-slate-400 hover:text-slate-100 p-1.5 rounded-lg hover:bg-slate-800 transition text-xs"
+              >
+                <Minimize2 className="w-4 h-4" />
+                <span>Minimize</span>
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                title="Close"
+                className="text-slate-400 hover:text-slate-100 p-1.5 rounded-lg hover:bg-slate-800 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
 
             {/* Header */}
             <div className="flex items-center gap-2 text-indigo-400 font-bold text-base">
@@ -165,9 +192,25 @@ export default function PermanentIdLookupModal() {
                 </div>
               </div>
             )}
+
+
+            {/* Bottom Modal Actions */}
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500 font-mono">
+                Press ESC key or click outside to minimize/close
+              </span>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition cursor-pointer"
+              >
+                <Minimize2 className="w-4 h-4 text-indigo-400" />
+                <span>Close / Minimize</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
     </>
   );
 }
+
