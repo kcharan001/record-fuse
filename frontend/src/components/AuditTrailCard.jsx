@@ -29,8 +29,15 @@ export default function AuditTrailCard({ reconciliation, auditData, onExport }) 
 
         <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
           <span className="text-slate-500 block text-[10px]">APPROVAL STATUS</span>
-          <span className="text-emerald-400 font-bold">{reconciliation?.approval_status || 'APPROVED'}</span>
+          <span className={
+            reconciliation?.approval_status === 'APPROVED' ? 'text-emerald-400 font-bold' :
+            reconciliation?.approval_status === 'REJECTED' ? 'text-rose-400 font-bold' :
+            'text-amber-400 font-bold'
+          }>
+            {reconciliation?.approval_status || 'PENDING'}
+          </span>
         </div>
+
 
         <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
           <span className="text-slate-500 block text-[10px]">VERIFICATION RESULT</span>
