@@ -66,3 +66,67 @@ export const fetchAIAnalysis = async (scenarioId = 'DEMO', forceFallback = false
   }
 };
 
+export const createOrUpdatePatient = async (patientData) => {
+  try {
+    const response = await apiClient.post('/api/records/patient', patientData);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to create/update patient:', error);
+    throw error;
+  }
+};
+
+export const addClinicalEvent = async (eventData) => {
+  try {
+    const response = await apiClient.post('/api/records/event', eventData);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to add clinical event:', error);
+    throw error;
+  }
+};
+
+export const fetchMasterDatabase = async () => {
+  try {
+    const response = await apiClient.get('/api/records/database');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch master database directory:', error);
+    throw error;
+  }
+};
+
+export const clearMasterDatabase = async () => {
+  try {
+    const response = await apiClient.delete('/api/records/database/clear');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to clear master database:', error);
+    throw error;
+  }
+};
+
+export const fetchPairRecords = async (patientAId, patientBId) => {
+  try {
+    const response = await apiClient.get('/api/records', {
+      params: { patient_a_id: patientAId, patient_b_id: patientBId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch pair records:', error);
+    throw error;
+  }
+};
+
+export const executePairReconciliation = async (patientAId, patientBId) => {
+  try {
+    const response = await apiClient.post('/api/reconcile', null, {
+      params: { patient_a_id: patientAId, patient_b_id: patientBId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to execute pair reconciliation:', error);
+    throw error;
+  }
+};
+
