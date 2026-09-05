@@ -27,6 +27,8 @@ class MergedTimelineEventSchema(BaseModel):
 class ReconciliationOutputSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    reconciliation_id: str = Field("RECON-REC-A-REC-B")
+    approval_status: str = Field("PENDING", description="'PENDING', 'APPROVED', or 'REJECTED'")
     record_a_count: int
     record_b_count: int
     total_events: int

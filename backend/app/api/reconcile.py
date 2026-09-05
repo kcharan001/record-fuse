@@ -1,16 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
+from typing import Dict, Any
+
 from app.database import get_db
 from app.models import Patient, ClinicalEvent
 from app.schemas.patient import PatientSchema
 from app.schemas.reconciliation import ReconciliationOutputSchema
 from app.schemas.verification import VerificationResultSchema
+from app.schemas.audit import AuditTrailSchema, ApprovalRequestSchema, IntegrityTestMatrixSchema
 from app.api.records import parse_event_metadata
 from app.engine.reconciler import TimelineReconciler
 from app.engine.verifier import ZeroLossVerifier
+from app.engine.integrity_tester import IntegrityTester
 from app.services.ai_service import AIService
 
 router = APIRouter(prefix="/api/reconcile", tags=["Timeline Reconciliation Engine"])
+
+# In-memory approval state for hackathon demo
+CURRENT_APPROVAL_STATUS: Dict[str, str] = {"status": "PENDING"}
 
 @router.post("", response_model=ReconciliationOutputSchema)
 def reconcile_patient_records(
@@ -45,6 +53,9 @@ def reconcile_patient_records(
     reconciler = TimelineReconciler()
     result = reconciler.reconcile(events_a, events_b)
 
+    # Attach current approval status
+    result.approval_status = CURRENT_APPROVAL_STATUS.get("status", "PENDING")
+
     # Machine-checkable zero-loss verification
     verifier = ZeroLossVerifier()
     verification_proof = verifier.verify(events_a, events_b, result.timeline)
@@ -57,6 +68,25 @@ def reconcile_patient_records(
     )
 
     return result
+
+@router.post("/approval")
+def set_merge_approval(payload: ApprovalRequestSchema):
+    """
+    User human-in-the-loop explicit merge approval action ('APPROVED' or 'REJECTED').
+    AI never automatically approves a merge.
+    """
+    if payload.approval_status not in ("APPROVED", "REJECTED", "PENDING"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Approval status must be 'APPROVED', 'REJECTED', or 'PENDING'."
+        )
+    
+    CURRENT_APPROVAL_STATUS["status"] = payload.approval_status
+    return {
+        "message": f"Merge approval status updated to '{payload.approval_status}'.",
+        "approval_status": payload.approval_status,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
 
 @router.get("/verification", response_model=VerificationResultSchema)
 def get_verification_proof(
@@ -84,3 +114,47 @@ def get_verification_proof(
 
     verifier = ZeroLossVerifier()
     return verifier.verify(events_a, events_b, result.timeline)
+
+@router.get("/audit", response_model=AuditTrailSchema)
+def get_audit_trail(
+    patient_a_id: str = "REC-A",
+    patient_b_id: str = "REC-B",
+    db: Session = Depends(get_db)
+):
+    """
+    Returns read-only auditable reconciliation record.
+    """
+    reconciliation = reconcile_patient_records(patient_a_id, patient_b_id, False, db)
+    v = reconciliation.verification
+    ai = reconciliation.ai_analysis
+
+    return AuditTrailSchema(
+        reconciliation_id=reconciliation.reconciliation_id,
+        patient_a_id=patient_a_id,
+        patient_b_id=patient_b_id,
+        reconciled_at=datetime.now(timezone.utc).isoformat(),
+        approval_status=reconciliation.approval_status,
+        record_a_count=reconciliation.record_a_count,
+        record_b_count=reconciliation.record_b_count,
+        total_events=reconciliation.total_events,
+        exact_overlaps_count=reconciliation.exact_overlaps_count,
+        near_overlaps_count=reconciliation.near_overlaps_count,
+        ai_status="FALLBACK" if (ai and ai.is_fallback) else "ACTIVE",
+        ai_fallback_reason=ai.fallback_mode if (ai and ai.is_fallback) else None,
+        match_confidence=ai.patient_match.match_confidence if ai else 0.95,
+        verification_status=v.status if v else "PASS",
+        lost_events_count=v.lost_events_count if v else 0,
+        missing_event_ids=v.missing_event_ids if v else [],
+        duplicate_event_ids=v.duplicate_event_ids if v else [],
+        invalid_provenance_event_ids=v.invalid_provenance_event_ids if v else [],
+        provenance_intact=v.provenance_intact if v else True
+    )
+
+@router.post("/integrity-test", response_model=IntegrityTestMatrixSchema)
+def run_integrity_test():
+    """
+    Executes developer/demo-only in-memory chaos test matrix against 7 scenarios.
+    Does not modify database or source records.
+    """
+    tester = IntegrityTester()
+    return tester.run_all_scenarios()
