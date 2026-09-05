@@ -16,7 +16,9 @@ class RecordPairResponse(BaseModel):
 class SeedDataResponse(BaseModel):
     message: str
     patient_count: int
-    record_a_events: int
-    record_b_events: int
+    scenarios_count: int = 1
+    record_a_events: int = 6
+    record_b_events: int = 7
     total_events: int
     seeded_at: str
+

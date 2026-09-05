@@ -8,23 +8,26 @@ import TimelineVisualizer from './components/TimelineVisualizer';
 import AuditTrailCard from './components/AuditTrailCard';
 import IntegrityTestModal from './components/IntegrityTestModal';
 import MergePreviewModal from './components/MergePreviewModal';
+import ScenarioSelector from './components/ScenarioSelector';
 import { fetchRecords, executeReconciliation, apiClient } from './services/api';
 import { ShieldCheck, Info, Cpu, FileJson } from 'lucide-react';
 
+
 export default function App() {
+  const [selectedScenarioId, setSelectedScenarioId] = useState('DEMO');
   const [recordData, setRecordData] = useState(null);
   const [reconciliation, setReconciliation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  const loadData = async () => {
+  const loadData = async (scenarioId = selectedScenarioId) => {
     setLoading(true);
     setError(null);
     try {
-      const records = await fetchRecords();
+      const records = await fetchRecords(scenarioId);
       setRecordData(records);
-      const recon = await executeReconciliation();
+      const recon = await executeReconciliation(scenarioId);
       setReconciliation(recon);
     } catch (err) {
       console.error('Failed to load RecordFuse data:', err);
@@ -35,8 +38,13 @@ export default function App() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData(selectedScenarioId);
+  }, [selectedScenarioId]);
+
+  const handleSelectScenario = (newScenarioId) => {
+    setSelectedScenarioId(newScenarioId);
+  };
+
 
   const handleApprove = async () => {
     try {
@@ -125,8 +133,15 @@ export default function App() {
           </div>
         )}
 
+        {/* Expanded Synthetic Dataset Scenario Selector */}
+        <ScenarioSelector
+          selectedScenarioId={selectedScenarioId}
+          onSelectScenario={handleSelectScenario}
+        />
+
         {/* Patient Demographic Match Card */}
         <PatientMatchCard
+
           patientA={recordData?.record_a?.patient}
           patientB={recordData?.record_b?.patient}
           aiAnalysis={reconciliation?.ai_analysis}

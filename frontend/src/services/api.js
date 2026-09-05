@@ -20,9 +20,11 @@ export const fetchHealth = async () => {
   }
 };
 
-export const fetchRecords = async () => {
+export const fetchRecords = async (scenarioId = 'DEMO') => {
   try {
-    const response = await apiClient.get('/api/records');
+    const response = await apiClient.get('/api/records', {
+      params: { scenario_id: scenarioId }
+    });
     return response.data;
   } catch (error) {
     console.error('Failed to fetch patient records:', error);
@@ -30,10 +32,10 @@ export const fetchRecords = async () => {
   }
 };
 
-export const executeReconciliation = async (patientAId = 'REC-A', patientBId = 'REC-B') => {
+export const executeReconciliation = async (scenarioId = 'DEMO', forceFallback = false) => {
   try {
     const response = await apiClient.post('/api/reconcile', null, {
-      params: { patient_a_id: patientAId, patient_b_id: patientBId }
+      params: { scenario_id: scenarioId, force_ai_fallback: forceFallback }
     });
     return response.data;
   } catch (error) {
@@ -52,10 +54,10 @@ export const seedDatabase = async () => {
   }
 };
 
-export const fetchAIAnalysis = async (patientAId = 'REC-A', patientBId = 'REC-B', forceFallback = false) => {
+export const fetchAIAnalysis = async (scenarioId = 'DEMO', forceFallback = false) => {
   try {
     const response = await apiClient.post('/api/ai/analyze', null, {
-      params: { patient_a_id: patientAId, patient_b_id: patientBId, force_fallback: forceFallback }
+      params: { scenario_id: scenarioId, force_fallback: forceFallback }
     });
     return response.data;
   } catch (error) {
@@ -63,3 +65,4 @@ export const fetchAIAnalysis = async (patientAId = 'REC-A', patientBId = 'REC-B'
     throw error;
   }
 };
+

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from app.database import get_db
 from app.models import Patient, ClinicalEvent
@@ -14,16 +14,26 @@ from app.engine.reconciler import TimelineReconciler
 from app.engine.verifier import ZeroLossVerifier
 from app.engine.integrity_tester import IntegrityTester
 from app.services.ai_service import AIService
+from app.services.seed_service import get_scenarios_list
 
 router = APIRouter(prefix="/api/reconcile", tags=["Timeline Reconciliation Engine"])
 
 # In-memory approval state for hackathon demo
 CURRENT_APPROVAL_STATUS: Dict[str, str] = {"status": "PENDING"}
 
+def resolve_patient_ids(patient_a_id: str, patient_b_id: str, scenario_id: Optional[str] = None):
+    if scenario_id:
+        scenarios = get_scenarios_list()
+        sc = next((s for s in scenarios if s["scenario_id"] == scenario_id), None)
+        if sc:
+            return sc["patient_a_id"], sc["patient_b_id"]
+    return patient_a_id, patient_b_id
+
 @router.post("", response_model=ReconciliationOutputSchema)
 def reconcile_patient_records(
     patient_a_id: str = "REC-A",
     patient_b_id: str = "REC-B",
+    scenario_id: Optional[str] = None,
     force_ai_fallback: bool = False,
     db: Session = Depends(get_db)
 ):
@@ -32,6 +42,8 @@ def reconcile_patient_records(
     and AI semantic context assistance on two patient records.
     Guarantees 100% preservation of all clinical events from both sides.
     """
+    patient_a_id, patient_b_id = resolve_patient_ids(patient_a_id, patient_b_id, scenario_id)
+
     patient_a_orm = db.query(Patient).filter(Patient.id == patient_a_id).first()
     patient_b_orm = db.query(Patient).filter(Patient.id == patient_b_id).first()
 
@@ -92,11 +104,14 @@ def set_merge_approval(payload: ApprovalRequestSchema):
 def get_verification_proof(
     patient_a_id: str = "REC-A",
     patient_b_id: str = "REC-B",
+    scenario_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     """
     Returns standalone machine-checkable zero-loss verification proof payload for target patient records.
     """
+    patient_a_id, patient_b_id = resolve_patient_ids(patient_a_id, patient_b_id, scenario_id)
+
     events_a_orm = db.query(ClinicalEvent).filter(ClinicalEvent.patient_id == patient_a_id).order_by(ClinicalEvent.timestamp.asc()).all()
     events_b_orm = db.query(ClinicalEvent).filter(ClinicalEvent.patient_id == patient_b_id).order_by(ClinicalEvent.timestamp.asc()).all()
 
@@ -119,12 +134,15 @@ def get_verification_proof(
 def get_audit_trail(
     patient_a_id: str = "REC-A",
     patient_b_id: str = "REC-B",
+    scenario_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     """
     Returns read-only auditable reconciliation record.
     """
-    reconciliation = reconcile_patient_records(patient_a_id, patient_b_id, False, db)
+    patient_a_id, patient_b_id = resolve_patient_ids(patient_a_id, patient_b_id, scenario_id)
+    reconciliation = reconcile_patient_records(patient_a_id, patient_b_id, None, False, db)
+
     v = reconciliation.verification
     ai = reconciliation.ai_analysis
 

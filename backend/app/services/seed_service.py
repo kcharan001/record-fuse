@@ -175,36 +175,85 @@ SYNTHETIC_EVENTS = [
     }
 ]
 
+from app.services.expanded_dataset import EXPANDED_SCENARIOS
+
+def get_scenarios_list():
+    """
+    Returns high-level metadata for all 21 available synthetic scenarios (DEMO + S01 to S20).
+    """
+    scenarios = [
+        {
+            "scenario_id": "DEMO",
+            "category": "demo_dataset",
+            "expected_match_class": "match",
+            "title": "Jonathan Doe vs John Doe (Original Demo Dataset)",
+            "patient_a_id": "REC-A",
+            "patient_b_id": "REC-B",
+            "patient_a_name": "Jonathan Doe",
+            "patient_b_name": "John Doe",
+            "events_a_count": len([e for e in SYNTHETIC_EVENTS if e["source_record"] == "record_A"]),
+            "events_b_count": len([e for e in SYNTHETIC_EVENTS if e["source_record"] == "record_B"]),
+            "total_events": len(SYNTHETIC_EVENTS)
+        }
+    ]
+    for sc in EXPANDED_SCENARIOS:
+        scenarios.append({
+            "scenario_id": sc["scenario_id"],
+            "category": sc["category"],
+            "expected_match_class": sc["expected_match_class"],
+            "title": sc["title"],
+            "patient_a_id": sc["patient_a"]["id"],
+            "patient_b_id": sc["patient_b"]["id"],
+            "patient_a_name": f"{sc['patient_a']['first_name']} {sc['patient_a']['last_name']}",
+            "patient_b_name": f"{sc['patient_b']['first_name']} {sc['patient_b']['last_name']}",
+            "events_a_count": len(sc["events_a"]),
+            "events_b_count": len(sc["events_b"]),
+            "total_events": len(sc["events_a"]) + len(sc["events_b"])
+        })
+    return scenarios
+
 def seed_database(db: Session):
     """
-    Cleans and seeds the database with 2 duplicate synthetic patient records
-    and 13 immutable clinical events.
+    Cleans and seeds the database with 21 synthetic duplicate-pair scenarios
+    (1 Original Demo + 20 Expanded Scenarios S01..S20).
     """
     # Delete existing data to guarantee clean idempotent reset
     db.query(ClinicalEvent).delete()
     db.query(Patient).delete()
     db.commit()
 
-    # Insert Patients
+    # 1. Insert DEMO Patients & Events
     for p_data in SYNTHETIC_PATIENTS:
         patient = Patient(**p_data)
         db.add(patient)
-    db.commit()
-
-    # Insert Clinical Events
     for e_data in SYNTHETIC_EVENTS:
         event = ClinicalEvent(**e_data)
         db.add(event)
     db.commit()
 
+    # 2. Insert 20 Expanded Scenarios Patients & Events
+    for sc in EXPANDED_SCENARIOS:
+        db.add(Patient(**sc["patient_a"]))
+        db.add(Patient(**sc["patient_b"]))
+        for e_data in sc["events_a"]:
+            db.add(ClinicalEvent(**e_data))
+        for e_data in sc["events_b"]:
+            db.add(ClinicalEvent(**e_data))
+    db.commit()
+
     count_a = db.query(ClinicalEvent).filter(ClinicalEvent.source_record == "record_A").count()
     count_b = db.query(ClinicalEvent).filter(ClinicalEvent.source_record == "record_B").count()
+    total_patients = db.query(Patient).count()
+    total_events = db.query(ClinicalEvent).count()
 
     return {
-        "message": "Synthetic clinical demo dataset seeded successfully",
-        "patient_count": len(SYNTHETIC_PATIENTS),
+        "message": f"Seeded {len(EXPANDED_SCENARIOS) + 1} synthetic patient duplicate-pair scenarios successfully",
+        "scenarios_count": len(EXPANDED_SCENARIOS) + 1,
+        "patient_count": total_patients,
         "record_a_events": count_a,
         "record_b_events": count_b,
-        "total_events": count_a + count_b,
+        "total_events": total_events,
         "seeded_at": datetime.now(timezone.utc).isoformat()
     }
+
+

@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -7,6 +8,7 @@ from app.schemas.ai import AIServiceResponseSchema
 from app.api.records import parse_event_metadata
 from app.engine.reconciler import TimelineReconciler
 from app.services.ai_service import AIService
+from app.services.seed_service import get_scenarios_list
 
 router = APIRouter(prefix="/api/ai", tags=["AI Assistance Service"])
 
@@ -14,6 +16,7 @@ router = APIRouter(prefix="/api/ai", tags=["AI Assistance Service"])
 def analyze_patient_pair(
     patient_a_id: str = "REC-A",
     patient_b_id: str = "REC-B",
+    scenario_id: Optional[str] = None,
     force_fallback: bool = False,
     db: Session = Depends(get_db)
 ):
@@ -21,6 +24,13 @@ def analyze_patient_pair(
     Executes AI patient match analysis, semantic event overlap evaluation, and executive summary synthesis.
     Automatically falls back to deterministic rule engine if API key is missing or request fails.
     """
+    if scenario_id:
+        scenarios = get_scenarios_list()
+        sc = next((s for s in scenarios if s["scenario_id"] == scenario_id), None)
+        if sc:
+            patient_a_id = sc["patient_a_id"]
+            patient_b_id = sc["patient_b_id"]
+
     patient_a_orm = db.query(Patient).filter(Patient.id == patient_a_id).first()
     patient_b_orm = db.query(Patient).filter(Patient.id == patient_b_id).first()
 
@@ -44,3 +54,4 @@ def analyze_patient_pair(
 
     ai_service = AIService()
     return ai_service.analyze_reconciliation(patient_a, patient_b, reconciliation_result, force_fallback=force_fallback)
+

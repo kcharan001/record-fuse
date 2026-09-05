@@ -3,10 +3,14 @@ def test_seed_endpoint(client):
     response = client.post("/api/records/seed")
     assert response.status_code == 200
     data = response.json()
-    assert data["patient_count"] == 2
-    assert data["record_a_events"] == 6
-    assert data["record_b_events"] == 7
-    assert data["total_events"] == 13
+    assert data["patient_count"] == 42
+    assert data["scenarios_count"] == 21
+    assert data["record_a_events"] == 33
+    assert data["record_b_events"] == 34
+    assert data["total_events"] == 67
+
+
+
 
 def test_get_all_records_structure(client):
     """Verify GET /api/records returns Record A (6) and Record B (7)."""
