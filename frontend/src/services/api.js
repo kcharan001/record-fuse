@@ -1,13 +1,13 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 5000,
+  timeout: 10000,
 });
 
 export const fetchHealth = async () => {
@@ -38,6 +38,28 @@ export const executeReconciliation = async (patientAId = 'REC-A', patientBId = '
     return response.data;
   } catch (error) {
     console.error('Failed to execute reconciliation engine:', error);
+    throw error;
+  }
+};
+
+export const seedDatabase = async () => {
+  try {
+    const response = await apiClient.post('/api/records/seed');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to seed database:', error);
+    throw error;
+  }
+};
+
+export const fetchAIAnalysis = async (patientAId = 'REC-A', patientBId = 'REC-B', forceFallback = false) => {
+  try {
+    const response = await apiClient.post('/api/ai/analyze', null, {
+      params: { patient_a_id: patientAId, patient_b_id: patientBId, force_fallback: forceFallback }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch AI analysis:', error);
     throw error;
   }
 };
