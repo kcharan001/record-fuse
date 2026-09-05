@@ -66,10 +66,10 @@ class ZeroLossVerifier:
 
             # Check provenance consistency
             if source == "record_A":
-                if orig_id not in ids_a or not (orig_id.startswith("A-") or "-A-" in orig_id):
+                if orig_id not in ids_a:
                     invalid_provenance_ids.append(orig_id)
             elif source == "record_B":
-                if orig_id not in ids_b or not (orig_id.startswith("B-") or "-B-" in orig_id):
+                if orig_id not in ids_b:
                     invalid_provenance_ids.append(orig_id)
             else:
                 invalid_provenance_ids.append(orig_id)

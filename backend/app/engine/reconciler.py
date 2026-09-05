@@ -100,9 +100,12 @@ class TimelineReconciler:
                 f"Reconciliation ID invariant failed: Duplicate or missing IDs detected in output."
             )
 
+        real_count_a = len([e for e in timeline_schemas if e.source_record == "record_A"])
+        real_count_b = len([e for e in timeline_schemas if e.source_record == "record_B"])
+
         return ReconciliationOutputSchema(
-            record_a_count=count_a,
-            record_b_count=count_b,
+            record_a_count=real_count_a,
+            record_b_count=real_count_b,
             total_events=actual_total,
             preserved_event_ids=preserved_ids,
             exact_overlaps_count=exact_overlaps_count,

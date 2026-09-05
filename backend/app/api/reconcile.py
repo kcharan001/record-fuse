@@ -101,8 +101,19 @@ def reconcile_patient_records(
     patient_a.permanent_patient_id = upi_id
     patient_b.permanent_patient_id = upi_id
 
-    events_a_orm = db.query(ClinicalEvent).filter(ClinicalEvent.patient_id == patient_a_id).order_by(ClinicalEvent.timestamp.asc()).all()
-    events_b_orm = db.query(ClinicalEvent).filter(ClinicalEvent.patient_id == patient_b_id).order_by(ClinicalEvent.timestamp.asc()).all()
+    all_events_orm = db.query(ClinicalEvent).filter(
+        (ClinicalEvent.patient_id == patient_a_id) | 
+        (ClinicalEvent.patient_id == patient_b_id)
+    ).order_by(ClinicalEvent.timestamp.asc()).all()
+
+    events_a_orm = [
+        e for e in all_events_orm 
+        if e.source_record == 'record_A' or (e.patient_id == patient_a_id and e.source_record != 'record_B')
+    ]
+    events_b_orm = [
+        e for e in all_events_orm 
+        if e.source_record == 'record_B' or (e.patient_id == patient_b_id and e.source_record != 'record_A')
+    ]
 
     events_a = [parse_event_metadata(e) for e in events_a_orm]
     events_b = [parse_event_metadata(e) for e in events_b_orm]
@@ -163,8 +174,19 @@ def get_verification_proof(
     """
     patient_a_id, patient_b_id = resolve_patient_ids(patient_a_id, patient_b_id, scenario_id)
 
-    events_a_orm = db.query(ClinicalEvent).filter(ClinicalEvent.patient_id == patient_a_id).order_by(ClinicalEvent.timestamp.asc()).all()
-    events_b_orm = db.query(ClinicalEvent).filter(ClinicalEvent.patient_id == patient_b_id).order_by(ClinicalEvent.timestamp.asc()).all()
+    all_events_orm = db.query(ClinicalEvent).filter(
+        (ClinicalEvent.patient_id == patient_a_id) | 
+        (ClinicalEvent.patient_id == patient_b_id)
+    ).order_by(ClinicalEvent.timestamp.asc()).all()
+
+    events_a_orm = [
+        e for e in all_events_orm 
+        if e.source_record == 'record_A' or (e.patient_id == patient_a_id and e.source_record != 'record_B')
+    ]
+    events_b_orm = [
+        e for e in all_events_orm 
+        if e.source_record == 'record_B' or (e.patient_id == patient_b_id and e.source_record != 'record_A')
+    ]
 
     if not events_a_orm and not events_b_orm:
         raise HTTPException(
