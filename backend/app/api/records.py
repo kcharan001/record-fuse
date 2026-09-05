@@ -304,7 +304,6 @@ def get_all_records(
 
 @router.get("/{record_id}", response_model=RecordDetailResponse)
 def get_record_by_id(record_id: str, db: Session = Depends(get_db)):
-
     """
     Retrieves detailed clinical record for a single patient ID ('REC-A' or 'REC-B').
     """
