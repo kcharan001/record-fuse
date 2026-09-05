@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Optional
 from collections import Counter
 from datetime import datetime, timezone
 from app.schemas.event import ClinicalEventSchema
@@ -19,10 +19,26 @@ class ZeroLossVerifier:
     Produces PASS if all assertions hold; FAIL if any assertion is violated.
     """
 
+    def _extract_event_id(self, item: Any) -> str:
+        if hasattr(item, "original_event_id"):
+            return item.original_event_id
+        if hasattr(item, "event_id"):
+            return item.event_id
+        if isinstance(item, dict):
+            return item.get("original_event_id") or item.get("event_id") or ""
+        return str(item)
+
+    def _extract_source_record(self, item: Any) -> Optional[str]:
+        if hasattr(item, "source_record"):
+            return item.source_record
+        if isinstance(item, dict):
+            return item.get("source_record")
+        return None
+
     def verify(
         self,
-        events_a: List[Union[ClinicalEventSchema, Dict[str, Any]]],
-        events_b: List[Union[ClinicalEventSchema, Dict[str, Any]]],
+        events_a: List[Union[ClinicalEventSchema, MergedTimelineEventSchema, Dict[str, Any]]],
+        events_b: List[Union[ClinicalEventSchema, MergedTimelineEventSchema, Dict[str, Any]]],
         merged_timeline: List[Union[MergedTimelineEventSchema, Dict[str, Any]]]
     ) -> VerificationResultSchema:
         """
@@ -34,14 +50,8 @@ class ZeroLossVerifier:
         actual_total = len(merged_timeline)
 
         # Extract original IDs
-        ids_a = {
-            (e.event_id if isinstance(e, ClinicalEventSchema) else e["event_id"]) 
-            for e in events_a
-        }
-        ids_b = {
-            (e.event_id if isinstance(e, ClinicalEventSchema) else e["event_id"]) 
-            for e in events_b
-        }
+        ids_a = {self._extract_event_id(e) for e in events_a}
+        ids_b = {self._extract_event_id(e) for e in events_b}
         all_original_ids = ids_a | ids_b
 
         # Extract merged IDs & source attributes
@@ -49,8 +59,8 @@ class ZeroLossVerifier:
         invalid_provenance_ids = []
 
         for item in merged_timeline:
-            orig_id = item.original_event_id if isinstance(item, MergedTimelineEventSchema) else item["original_event_id"]
-            source = item.source_record if isinstance(item, MergedTimelineEventSchema) else item.get("source_record")
+            orig_id = self._extract_event_id(item)
+            source = self._extract_source_record(item)
 
             merged_id_list.append(orig_id)
 

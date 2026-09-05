@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from app.schemas.verification import VerificationResultSchema
+from app.schemas.ai import AIServiceResponseSchema
 
 class MergedTimelineEventSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -34,3 +35,4 @@ class ReconciliationOutputSchema(BaseModel):
     near_overlaps_count: int
     timeline: List[MergedTimelineEventSchema]
     verification: Optional[VerificationResultSchema] = None
+    ai_analysis: Optional[AIServiceResponseSchema] = None

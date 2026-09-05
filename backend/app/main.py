@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import init_db, SessionLocal
 from app.services.seed_service import seed_database
-from app.api import health, records, reconcile
+from app.api import health, records, reconcile, ai
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,6 +37,7 @@ app.add_middleware(
 app.include_router(health.router, tags=["Health"])
 app.include_router(records.router)
 app.include_router(reconcile.router)
+app.include_router(ai.router)
 
 @app.get("/")
 def read_root():
@@ -45,6 +46,7 @@ def read_root():
         "health_check": "/health",
         "records_api": "/api/records",
         "reconcile_api": "/api/reconcile",
+        "ai_api": "/api/ai/analyze",
         "seed_api": "/api/records/seed",
         "documentation": "/docs"
     }
