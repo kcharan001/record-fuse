@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Search, Trash2, ChevronDown, ChevronUp, User, Calendar, Phone, MapPin, ShieldCheck, Activity, GitCompare, Download } from 'lucide-react';
+import { Database, Search, Trash2, ChevronDown, ChevronUp, User, Calendar, Phone, MapPin, ShieldCheck, Activity, GitCompare, Download, X } from 'lucide-react';
 import { fetchMasterDatabase, clearMasterDatabase } from '../services/api';
 import { downloadPatientReport } from '../utils/reportGenerator';
 import { getCountryConfig } from '../config/countriesConfig';
@@ -51,15 +51,53 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
     }
   };
 
+  const activeSearch = (externalSearchQuery || searchQuery).toLowerCase().trim();
+
   const filteredPatients = data.patients.filter((item) => {
-    const q = (externalSearchQuery || searchQuery).toLowerCase();
+    if (!activeSearch) return true;
+
     const p = item.patient;
-    return (
-      p.first_name.toLowerCase().includes(q) ||
-      p.last_name.toLowerCase().includes(q) ||
-      (p.ssn_last4 && p.ssn_last4.toLowerCase().includes(q)) ||
-      (p.permanent_patient_id && p.permanent_patient_id.toLowerCase().includes(q))
-    );
+    const fullName = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase();
+    const reverseFullName = `${p.last_name || ''} ${p.first_name || ''}`.toLowerCase();
+    const countryConfig = getCountryConfig(p.national_id_country);
+    const countryName = countryConfig ? countryConfig.name.toLowerCase() : '';
+    const idName = countryConfig ? countryConfig.idName.toLowerCase() : (p.national_id_type || '').toLowerCase();
+
+    const matchesDemographics =
+      fullName.includes(activeSearch) ||
+      reverseFullName.includes(activeSearch) ||
+      (p.first_name && p.first_name.toLowerCase().includes(activeSearch)) ||
+      (p.last_name && p.last_name.toLowerCase().includes(activeSearch)) ||
+      (p.permanent_patient_id && p.permanent_patient_id.toLowerCase().includes(activeSearch)) ||
+      (p.ssn_last4 && p.ssn_last4.toLowerCase().includes(activeSearch)) ||
+      (p.national_id_last4 && p.national_id_last4.toLowerCase().includes(activeSearch)) ||
+      (p.phone && p.phone.toLowerCase().includes(activeSearch)) ||
+      (p.dob && p.dob.toLowerCase().includes(activeSearch)) ||
+      (p.age !== undefined && p.age !== null && String(p.age) === activeSearch) ||
+      (p.gender && p.gender.toLowerCase().includes(activeSearch)) ||
+      (p.city && p.city.toLowerCase().includes(activeSearch)) ||
+      (p.state && p.state.toLowerCase().includes(activeSearch)) ||
+      (p.zip_code && p.zip_code.toLowerCase().includes(activeSearch)) ||
+      (p.national_id_country && p.national_id_country.toLowerCase().includes(activeSearch)) ||
+      countryName.includes(activeSearch) ||
+      idName.includes(activeSearch);
+
+    if (matchesDemographics) return true;
+
+    if (item.events && Array.isArray(item.events)) {
+      return item.events.some((ev) => {
+        return (
+          (ev.event_name && ev.event_name.toLowerCase().includes(activeSearch)) ||
+          (ev.event_type && ev.event_type.toLowerCase().includes(activeSearch)) ||
+          (ev.facility && ev.facility.toLowerCase().includes(activeSearch)) ||
+          (ev.notes && ev.notes.toLowerCase().includes(activeSearch)) ||
+          (ev.clinical_note && ev.clinical_note.toLowerCase().includes(activeSearch)) ||
+          (ev.value && String(ev.value).toLowerCase().includes(activeSearch))
+        );
+      });
+    }
+
+    return false;
   });
 
   return (
@@ -117,15 +155,30 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
       ) : null}
 
       {/* Search Input Bar */}
-      <div className="relative">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search stored database by Patient Name, SSN Last 4, or Permanent UPI..."
-          className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-600"
-        />
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <input
+            type="text"
+            value={externalSearchQuery || searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search database by Name, Age, Phone, City, National ID/Country, UPI, Allergies, Labs..."
+            className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-10 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-600 transition-all"
+          />
+          {(externalSearchQuery || searchQuery) && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition-all"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {activeSearch && (
+          <div className="shrink-0 px-3 py-2 bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs font-semibold rounded-xl text-center">
+            Found {filteredPatients.length} of {data.total_patients} patients
+          </div>
+        )}
       </div>
 
       {/* Patient Database List */}
