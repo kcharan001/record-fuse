@@ -89,7 +89,6 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
     const phone = p.phone ? String(p.phone).toLowerCase() : '';
     const email = p.email ? String(p.email).toLowerCase() : '';
     const dob = p.dob ? String(p.dob).toLowerCase() : '';
-    const age = p.age !== null && p.age !== undefined ? String(p.age).toLowerCase() : '';
     const gender = p.gender ? String(p.gender).toLowerCase() : '';
     const city = p.city ? String(p.city).toLowerCase() : '';
     const state = p.state ? String(p.state).toLowerCase() : '';
@@ -112,7 +111,6 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
       phone.includes(activeSearch) ||
       email.includes(activeSearch) ||
       dob.includes(activeSearch) ||
-      age.includes(activeSearch) ||
       gender.includes(activeSearch) ||
       city.includes(activeSearch) ||
       state.includes(activeSearch) ||
@@ -258,7 +256,7 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
 
                       <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-1">
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" /> DOB: {patient.dob} {patient.age ? `(Age ${patient.age})` : ''} ({patient.gender})
+                          <Calendar className="w-3.5 h-3.5" /> DOB: {patient.dob} ({patient.gender})
                         </span>
                         <span>
                           National ID: {getCountryConfig(patient.national_id_country || 'IN').flag} {patient.national_id_type || getCountryConfig(patient.national_id_country || 'IN').idLabel} (****{patient.national_id_last4 || patient.ssn_last4 || '0000'})

@@ -105,8 +105,8 @@ export default function PatientRegistrationForm({ onPatientSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.first_name || !formData.last_name || !formData.dob || !formData.age || (!formData.national_id_last4 && !formData.ssn_last4)) {
-      setNotification({ type: 'error', message: 'First Name, Last Name, DOB, Age (*), and National ID are required.' });
+    if (!formData.first_name || !formData.last_name || !formData.dob || (!formData.national_id_last4 && !formData.ssn_last4)) {
+      setNotification({ type: 'error', message: 'First Name, Last Name, DOB (*), and National ID are required.' });
       return;
     }
 
@@ -283,24 +283,6 @@ export default function PatientRegistrationForm({ onPatientSaved }) {
               value={formData.dob}
               onChange={handleInputChange}
               className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-600"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-indigo-900 mb-1 flex items-center justify-between">
-              <span>Age *</span>
-              <span className="text-[10px] text-indigo-600 font-semibold">(Identity Evaluation)</span>
-            </label>
-            <input
-              type="number"
-              name="age"
-              value={formData.age}
-              onChange={handleInputChange}
-              placeholder="e.g. 22"
-              min="0"
-              max="120"
-              className="w-full bg-white border border-indigo-300 rounded-xl px-3 py-2 text-sm text-slate-900 font-bold focus:outline-none focus:border-indigo-600 font-mono shadow-sm"
               required
             />
           </div>
