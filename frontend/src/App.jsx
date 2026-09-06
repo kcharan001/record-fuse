@@ -155,7 +155,7 @@ export default function App() {
               }`}
             >
               <Database className="w-4 h-4" />
-              <span>Master Patient Database & Entry</span>
+              <span>Master Patient Database</span>
             </button>
           </div>
 
