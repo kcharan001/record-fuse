@@ -120,11 +120,24 @@ class AIService:
         else:
             discrepancies.append(f"DOB mismatch: {patient_a.dob} vs {patient_b.dob}")
 
-        if ssn_match:
+        # Country-Aware National ID Evaluation (Different Country Safety Rule)
+        country_a = getattr(patient_a, 'national_id_country', None) or 'IN'
+        country_b = getattr(patient_b, 'national_id_country', None) or 'IN'
+        id_type_a = getattr(patient_a, 'national_id_type', None) or 'National ID'
+        
+        last4_a = getattr(patient_a, 'national_id_last4', None) or patient_a.ssn_last4
+        last4_b = getattr(patient_b, 'national_id_last4', None) or patient_b.ssn_last4
+
+        # Verify national_id_country == national_id_country FIRST before comparing digits
+        national_id_match = (country_a == country_b) and (last4_a == last4_b) and bool(last4_a)
+
+        if national_id_match:
             base_score += 0.30
-            matching_factors.append(f"Exact match on SSN last 4 digits ({patient_a.ssn_last4})")
+            matching_factors.append(f"National ID similarity: 100% (Country '{country_a}' + {id_type_a} last 4 match '****{last4_a}')")
+        elif country_a != country_b:
+            discrepancies.append(f"Different Country Safety Rule triggered: Record A Country '{country_a}' vs Record B Country '{country_b}' (National IDs not equivalent)")
         else:
-            discrepancies.append(f"SSN last 4 mismatch: {patient_a.ssn_last4} vs {patient_b.ssn_last4}")
+            discrepancies.append(f"National ID last 4 mismatch: ****{last4_a} vs ****{last4_b}")
 
         if last_name_match:
             base_score += 0.15

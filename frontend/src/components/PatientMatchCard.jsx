@@ -1,11 +1,18 @@
 import React from 'react';
 import { UserCheck, AlertTriangle, CheckCircle2, QrCode } from 'lucide-react';
+import { getCountryConfig } from '../config/countriesConfig';
 
 export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
   const matchInfo = aiAnalysis?.patient_match;
   const confidencePercent = Math.round((matchInfo?.match_confidence || 0.95) * 100);
 
-  const ssn = patientA?.ssn_last4 || "0000";
+  const countryAConfig = getCountryConfig(patientA?.national_id_country || 'IN');
+  const countryBConfig = getCountryConfig(patientB?.national_id_country || 'IN');
+
+  const last4A = patientA?.national_id_last4 || patientA?.ssn_last4 || '0000';
+  const last4B = patientB?.national_id_last4 || patientB?.ssn_last4 || '0000';
+
+  const ssn = last4A;
   const last = (patientA?.last_name || "PATIENT").toUpperCase().replace(/\s+/g, "");
   const year = patientA?.dob ? patientA.dob.split("-")[0] : "2026";
   const permanentId = `UPI-${year}-${ssn}-${last}`;
@@ -72,8 +79,8 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
               <span className="font-mono text-slate-800">{patientA?.dob} {patientA?.age ? `(${patientA.age} yrs)` : ''}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
-              <span className="text-slate-500">Aadhaar / Nat'l ID:</span>
-              <span className="font-mono text-slate-800">****-****-{patientA?.ssn_last4}</span>
+              <span className="text-slate-500">National ID ({countryAConfig.flag} {countryAConfig.name}):</span>
+              <span className="font-mono text-slate-800 font-bold">{patientA?.national_id_type || countryAConfig.idLabel}: ****{last4A}</span>
             </div>
             <div className="flex justify-between py-1">
               <span className="text-slate-500">Address:</span>
@@ -103,8 +110,8 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
               <span className="font-mono text-slate-800">{patientB?.dob} {patientB?.age ? `(${patientB.age} yrs)` : ''}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
-              <span className="text-slate-500">Aadhaar / Nat'l ID:</span>
-              <span className="font-mono text-slate-800">****-****-{patientB?.ssn_last4}</span>
+              <span className="text-slate-500">National ID ({countryBConfig.flag} {countryBConfig.name}):</span>
+              <span className="font-mono text-slate-800 font-bold">{patientB?.national_id_type || countryBConfig.idLabel}: ****{last4B}</span>
             </div>
             <div className="flex justify-between py-1">
               <span className="text-slate-500">Address:</span>

@@ -11,6 +11,9 @@ SYNTHETIC_PATIENTS = [
         "dob": "1982-04-14",
         "gender": "Male",
         "ssn_last4": "4892",
+        "national_id_country": "IN",
+        "national_id_type": "Aadhaar",
+        "national_id_last4": "4892",
         "phone": "555-234-5678",
         "address": "742 Evergreen Terrace, Springfield"
     },
@@ -21,6 +24,9 @@ SYNTHETIC_PATIENTS = [
         "dob": "1982-04-14",
         "gender": "Male",
         "ssn_last4": "4892",
+        "national_id_country": "IN",
+        "national_id_type": "Aadhaar",
+        "national_id_last4": "4892",
         "phone": "(555) 234-5678",
         "address": "742 Evergreen Terr, Springfield"
     }
@@ -136,10 +142,20 @@ def seed_database(db: Session, force_reset: bool = False):
 
     # 2. Insert 8 Expanded Scenarios Patients & Events if missing
     for sc in EXPANDED_SCENARIOS:
-        if not db.query(Patient).filter(Patient.id == sc["patient_a"]["id"]).first():
-            db.add(Patient(**sc["patient_a"]))
-        if not db.query(Patient).filter(Patient.id == sc["patient_b"]["id"]).first():
-            db.add(Patient(**sc["patient_b"]))
+        pa = dict(sc["patient_a"])
+        pa.setdefault("national_id_country", "IN")
+        pa.setdefault("national_id_type", "Aadhaar")
+        pa.setdefault("national_id_last4", pa.get("ssn_last4", "0000"))
+
+        pb = dict(sc["patient_b"])
+        pb.setdefault("national_id_country", "IN")
+        pb.setdefault("national_id_type", "Aadhaar")
+        pb.setdefault("national_id_last4", pb.get("ssn_last4", "0000"))
+
+        if not db.query(Patient).filter(Patient.id == pa["id"]).first():
+            db.add(Patient(**pa))
+        if not db.query(Patient).filter(Patient.id == pb["id"]).first():
+            db.add(Patient(**pb))
         for e_data in sc["events_a"]:
             if not db.query(ClinicalEvent).filter(ClinicalEvent.event_id == e_data["event_id"]).first():
                 db.add(ClinicalEvent(**e_data))

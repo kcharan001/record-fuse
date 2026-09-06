@@ -11,7 +11,10 @@ class Patient(Base):
     dob = Column(String(20), nullable=False) # ISO YYYY-MM-DD
     age = Column(String(20), nullable=True) # e.g. "22"
     gender = Column(String(20), nullable=False)
-    ssn_last4 = Column(String(4), nullable=False)
+    ssn_last4 = Column(String(20), nullable=False, default="0000")
+    national_id_country = Column(String(10), default="IN", nullable=True)
+    national_id_type = Column(String(50), default="Aadhaar", nullable=True)
+    national_id_last4 = Column(String(20), nullable=True)
     phone = Column(String(20), nullable=True)
     address = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

@@ -47,12 +47,19 @@ def create_or_update_patient(payload: PatientCreateSchema, db: Session = Depends
         func.lower(Patient.last_name) == last_clean.lower()
     ).first()
 
+    country_val = payload.national_id_country or "IN"
+    type_val = payload.national_id_type or "Aadhaar"
+    last4_val = payload.national_id_last4 or payload.ssn_last4 or "0000"
+
     if existing_patient:
         existing_patient.dob = payload.dob
         if payload.age:
             existing_patient.age = payload.age
         existing_patient.gender = payload.gender
-        existing_patient.ssn_last4 = payload.ssn_last4
+        existing_patient.ssn_last4 = last4_val
+        existing_patient.national_id_country = country_val
+        existing_patient.national_id_type = type_val
+        existing_patient.national_id_last4 = last4_val
         if payload.phone:
             existing_patient.phone = payload.phone
         if payload.address:
@@ -79,7 +86,10 @@ def create_or_update_patient(payload: PatientCreateSchema, db: Session = Depends
             dob=payload.dob,
             age=payload.age,
             gender=payload.gender,
-            ssn_last4=payload.ssn_last4,
+            ssn_last4=last4_val,
+            national_id_country=country_val,
+            national_id_type=type_val,
+            national_id_last4=last4_val,
             phone=payload.phone,
             address=payload.address
         )

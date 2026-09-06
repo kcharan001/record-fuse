@@ -24,5 +24,18 @@ def get_db():
         db.close()
 
 def init_db():
-    """Initializes the database schema tables."""
+    """Initializes the database schema tables and auto-migrates missing columns."""
     Base.metadata.create_all(bind=engine)
+    with engine.connect() as conn:
+        from sqlalchemy import text
+        for col_def in [
+            "ALTER TABLE patients ADD COLUMN age VARCHAR(20)",
+            "ALTER TABLE patients ADD COLUMN national_id_country VARCHAR(10) DEFAULT 'IN'",
+            "ALTER TABLE patients ADD COLUMN national_id_type VARCHAR(50) DEFAULT 'Aadhaar'",
+            "ALTER TABLE patients ADD COLUMN national_id_last4 VARCHAR(20)"
+        ]:
+            try:
+                conn.execute(text(col_def))
+            except Exception:
+                pass
+        conn.commit()

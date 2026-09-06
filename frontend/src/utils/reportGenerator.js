@@ -1,3 +1,5 @@
+import { getCountryConfig } from '../config/countriesConfig';
+
 /**
  * Utility functions for generating downloadable Clinical History Reports (Printable HTML / PDF ready)
  */
@@ -7,7 +9,9 @@ export function downloadPatientReport(patient, events) {
 
   const generatedAt = new Date().toLocaleString();
   const year = patient.dob?.split('-')[0] || '2026';
-  const upi = patient.permanent_patient_id || `UPI-${year}-${patient.ssn_last4 || '0000'}-${(patient.last_name || 'PATIENT').toUpperCase()}`;
+  const last4 = patient.national_id_last4 || patient.ssn_last4 || '0000';
+  const countryConfig = getCountryConfig(patient.national_id_country || 'IN');
+  const upi = patient.permanent_patient_id || `UPI-${year}-${last4}-${(patient.last_name || 'PATIENT').toUpperCase()}`;
   const safeEvents = events || [];
 
   const eventsHtml = safeEvents.map((ev, idx) => `
@@ -87,8 +91,8 @@ export function downloadPatientReport(patient, events) {
       <div class="field-value">${patient.dob} (${patient.gender})</div>
     </div>
     <div>
-      <div class="field-label">Aadhaar / National ID (Last 4)</div>
-      <div class="field-value" style="font-family: monospace;">****-****-${patient.ssn_last4 || '0000'}</div>
+      <div class="field-label">National ID (${countryConfig.flag} ${countryConfig.name})</div>
+      <div class="field-value" style="font-family: monospace;">${patient.national_id_type || countryConfig.idLabel}: ****${last4}</div>
     </div>
     <div>
       <div class="field-label">Phone Number</div>

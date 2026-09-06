@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Database, Search, Trash2, ChevronDown, ChevronUp, User, Calendar, Phone, MapPin, ShieldCheck, Activity, GitCompare, Download } from 'lucide-react';
 import { fetchMasterDatabase, clearMasterDatabase } from '../services/api';
 import { downloadPatientReport } from '../utils/reportGenerator';
+import { getCountryConfig } from '../config/countriesConfig';
 
 export default function MasterDatabaseDirectory({ onSelectPairForReconciliation }) {
   const [data, setData] = useState({ total_patients: 0, patients: [] });
@@ -175,7 +176,9 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation 
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5" /> DOB: {patient.dob} {patient.age ? `(Age ${patient.age})` : ''} ({patient.gender})
                         </span>
-                        <span>Aadhaar / Nat'l ID: ****-****-{patient.ssn_last4}</span>
+                        <span>
+                          National ID: {getCountryConfig(patient.national_id_country || 'IN').flag} {patient.national_id_type || getCountryConfig(patient.national_id_country || 'IN').idLabel} (****{patient.national_id_last4 || patient.ssn_last4 || '0000'})
+                        </span>
                         {patient.phone && (
                           <span className="flex items-center gap-1">
                             <Phone className="w-3.5 h-3.5" /> {patient.phone}
