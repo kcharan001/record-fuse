@@ -51,48 +51,74 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
     }
   };
 
-  const activeSearch = (externalSearchQuery || searchQuery).toLowerCase().trim();
+  const activeSearch = (externalSearchQuery || searchQuery || '').toString().toLowerCase().trim();
 
-  const filteredPatients = data.patients.filter((item) => {
+  const filteredPatients = (data?.patients || []).filter((item) => {
     if (!activeSearch) return true;
+    if (!item || !item.patient) return false;
 
     const p = item.patient;
-    const fullName = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase();
-    const reverseFullName = `${p.last_name || ''} ${p.first_name || ''}`.toLowerCase();
+    const firstName = p.first_name ? String(p.first_name).toLowerCase() : '';
+    const lastName = p.last_name ? String(p.last_name).toLowerCase() : '';
+    const fullName = `${firstName} ${lastName}`.trim();
+    const reverseFullName = `${lastName} ${firstName}`.trim();
+
+    const permId = p.permanent_patient_id ? String(p.permanent_patient_id).toLowerCase() : '';
+    const ssnLast4 = p.ssn_last4 !== null && p.ssn_last4 !== undefined ? String(p.ssn_last4).toLowerCase() : '';
+    const natIdLast4 = p.national_id_last4 !== null && p.national_id_last4 !== undefined ? String(p.national_id_last4).toLowerCase() : '';
+    const phone = p.phone ? String(p.phone).toLowerCase() : '';
+    const dob = p.dob ? String(p.dob).toLowerCase() : '';
+    const age = p.age !== null && p.age !== undefined ? String(p.age).toLowerCase() : '';
+    const gender = p.gender ? String(p.gender).toLowerCase() : '';
+    const city = p.city ? String(p.city).toLowerCase() : '';
+    const state = p.state ? String(p.state).toLowerCase() : '';
+    const zipCode = p.zip_code ? String(p.zip_code).toLowerCase() : '';
+    const natCountry = p.national_id_country ? String(p.national_id_country).toLowerCase() : '';
+    const natType = p.national_id_type ? String(p.national_id_type).toLowerCase() : '';
+
     const countryConfig = getCountryConfig(p.national_id_country);
-    const countryName = countryConfig ? countryConfig.name.toLowerCase() : '';
-    const idName = countryConfig ? countryConfig.idName.toLowerCase() : (p.national_id_type || '').toLowerCase();
+    const countryName = countryConfig?.name ? String(countryConfig.name).toLowerCase() : '';
+    const countryIdName = countryConfig?.idName ? String(countryConfig.idName).toLowerCase() : '';
 
     const matchesDemographics =
       fullName.includes(activeSearch) ||
       reverseFullName.includes(activeSearch) ||
-      (p.first_name && p.first_name.toLowerCase().includes(activeSearch)) ||
-      (p.last_name && p.last_name.toLowerCase().includes(activeSearch)) ||
-      (p.permanent_patient_id && p.permanent_patient_id.toLowerCase().includes(activeSearch)) ||
-      (p.ssn_last4 && p.ssn_last4.toLowerCase().includes(activeSearch)) ||
-      (p.national_id_last4 && p.national_id_last4.toLowerCase().includes(activeSearch)) ||
-      (p.phone && p.phone.toLowerCase().includes(activeSearch)) ||
-      (p.dob && p.dob.toLowerCase().includes(activeSearch)) ||
-      (p.age !== undefined && p.age !== null && String(p.age) === activeSearch) ||
-      (p.gender && p.gender.toLowerCase().includes(activeSearch)) ||
-      (p.city && p.city.toLowerCase().includes(activeSearch)) ||
-      (p.state && p.state.toLowerCase().includes(activeSearch)) ||
-      (p.zip_code && p.zip_code.toLowerCase().includes(activeSearch)) ||
-      (p.national_id_country && p.national_id_country.toLowerCase().includes(activeSearch)) ||
+      firstName.includes(activeSearch) ||
+      lastName.includes(activeSearch) ||
+      permId.includes(activeSearch) ||
+      ssnLast4.includes(activeSearch) ||
+      natIdLast4.includes(activeSearch) ||
+      phone.includes(activeSearch) ||
+      dob.includes(activeSearch) ||
+      age.includes(activeSearch) ||
+      gender.includes(activeSearch) ||
+      city.includes(activeSearch) ||
+      state.includes(activeSearch) ||
+      zipCode.includes(activeSearch) ||
+      natCountry.includes(activeSearch) ||
+      natType.includes(activeSearch) ||
       countryName.includes(activeSearch) ||
-      idName.includes(activeSearch);
+      countryIdName.includes(activeSearch);
 
     if (matchesDemographics) return true;
 
     if (item.events && Array.isArray(item.events)) {
       return item.events.some((ev) => {
+        if (!ev) return false;
+        const name = ev.event_name ? String(ev.event_name).toLowerCase() : '';
+        const type = ev.event_type ? String(ev.event_type).toLowerCase() : '';
+        const facility = ev.facility ? String(ev.facility).toLowerCase() : '';
+        const notes = ev.notes ? String(ev.notes).toLowerCase() : '';
+        const clinicalNote = ev.clinical_note ? String(ev.clinical_note).toLowerCase() : '';
+        const value = ev.value !== null && ev.value !== undefined ? String(ev.value).toLowerCase() : '';
+
         return (
-          (ev.event_name && ev.event_name.toLowerCase().includes(activeSearch)) ||
-          (ev.event_type && ev.event_type.toLowerCase().includes(activeSearch)) ||
-          (ev.facility && ev.facility.toLowerCase().includes(activeSearch)) ||
-          (ev.notes && ev.notes.toLowerCase().includes(activeSearch)) ||
-          (ev.clinical_note && ev.clinical_note.toLowerCase().includes(activeSearch)) ||
-          (ev.value && String(ev.value).toLowerCase().includes(activeSearch))
+          name.includes(activeSearch) ||
+          type.includes(activeSearch) ||
+          facility.includes(activeSearch) ||
+          notes.includes(activeSearch) ||
+          clinicalNote.includes(activeSearch) ||
+          value.includes(activeSearch)
         );
       });
     }
@@ -176,7 +202,7 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
         </div>
         {activeSearch && (
           <div className="shrink-0 px-3 py-2 bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs font-semibold rounded-xl text-center">
-            Found {filteredPatients.length} of {data.total_patients} patients
+            Found {filteredPatients.length} of {data?.total_patients || 0} patients
           </div>
         )}
       </div>
