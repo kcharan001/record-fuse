@@ -1,8 +1,17 @@
 import React from 'react';
-import { FileCheck2, Download, ShieldCheck } from 'lucide-react';
+import { FileCheck2, Download, Printer } from 'lucide-react';
+import { downloadReconciledReport } from '../utils/reportGenerator';
 
-export default function AuditTrailCard({ reconciliation, auditData, onExport }) {
+export default function AuditTrailCard({ reconciliation, recordData, onExport }) {
   const isPass = reconciliation?.verification?.status === 'PASS';
+
+  const handleDownloadReport = () => {
+    downloadReconciledReport(
+      recordData?.record_a?.patient,
+      recordData?.record_b?.patient,
+      reconciliation
+    );
+  };
 
   return (
     <div className="p-6 rounded-2xl bg-white border border-slate-200 space-y-4 shadow-sm">
@@ -12,13 +21,23 @@ export default function AuditTrailCard({ reconciliation, auditData, onExport }) 
           <span>Auditable Reconciliation Record</span>
         </div>
 
-        <button
-          onClick={onExport}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition"
-        >
-          <Download className="w-4 h-4" />
-          <span>Export JSON Audit Report</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleDownloadReport}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition"
+          >
+            <Printer className="w-4 h-4" />
+            <span>Download Master Clinical Report (PDF)</span>
+          </button>
+
+          <button
+            onClick={onExport}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export JSON Audit File</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">

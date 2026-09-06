@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Search, Trash2, ChevronDown, ChevronUp, User, Calendar, Phone, MapPin, ShieldCheck, Activity, GitCompare } from 'lucide-react';
+import { Database, Search, Trash2, ChevronDown, ChevronUp, User, Calendar, Phone, MapPin, ShieldCheck, Activity, GitCompare, Download } from 'lucide-react';
 import { fetchMasterDatabase, clearMasterDatabase } from '../services/api';
+import { downloadPatientReport } from '../utils/reportGenerator';
 
 export default function MasterDatabaseDirectory({ onSelectPairForReconciliation }) {
   const [data, setData] = useState({ total_patients: 0, patients: [] });
@@ -214,6 +215,15 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation 
                       }`}
                     >
                       {isSelectedB ? 'Selected as Record B' : 'Set as Record B'}
+                    </button>
+
+                    <button
+                      onClick={() => downloadPatientReport(patient, events)}
+                      title="Download Official Person Clinical History Report (Printable HTML / PDF)"
+                      className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border font-semibold bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100 transition-colors shadow-sm"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download Report</span>
                     </button>
 
                     <button

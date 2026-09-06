@@ -233,6 +233,7 @@ export default function App() {
             {/* Read-Only Audit Trail Card */}
             <AuditTrailCard
               reconciliation={reconciliation}
+              recordData={recordData}
               onExport={handleExportJSON}
             />
           </div>
