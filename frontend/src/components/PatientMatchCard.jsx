@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCheck, AlertTriangle, CheckCircle2, QrCode } from 'lucide-react';
+import { UserCheck, AlertTriangle, CheckCircle2, QrCode, Sparkles } from 'lucide-react';
 import { getCountryConfig } from '../config/countriesConfig';
 
 export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
@@ -120,6 +120,40 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
           </div>
         </div>
       </div>
+
+      {/* AI Field Conflict Resolution Recommendations */}
+      {aiAnalysis?.field_conflict_recommendations?.length > 0 && (
+        <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-200 space-y-3 text-xs">
+          <div className="flex items-center gap-2 font-bold text-purple-950">
+            <Sparkles className="w-4 h-4 text-purple-600" />
+            <span>AI Authoritative Master Profile Recommendations</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-purple-200 text-purple-900 font-semibold text-[11px]">
+                  <th className="py-1.5 px-2">Attribute</th>
+                  <th className="py-1.5 px-2">Record A</th>
+                  <th className="py-1.5 px-2">Record B</th>
+                  <th className="py-1.5 px-2">AI Recommended Master Value</th>
+                  <th className="py-1.5 px-2">AI Rationale</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-purple-100 text-slate-800 text-[11px]">
+                {aiAnalysis.field_conflict_recommendations.map((rec, idx) => (
+                  <tr key={idx} className="hover:bg-purple-100/40">
+                    <td className="py-2 px-2 font-bold text-slate-900">{rec.field_name}</td>
+                    <td className="py-2 px-2 text-slate-600">{rec.record_a_value || '—'}</td>
+                    <td className="py-2 px-2 text-slate-600">{rec.record_b_value || '—'}</td>
+                    <td className="py-2 px-2 font-bold text-emerald-800 bg-emerald-100/70 rounded px-1.5">{rec.recommended_value}</td>
+                    <td className="py-2 px-2 text-purple-900 italic">{rec.ai_rationale}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* AI Matching Rationale & Discrepancies */}
       {matchInfo && (

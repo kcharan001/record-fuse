@@ -27,12 +27,30 @@ class AIExecutiveSummarySchema(BaseModel):
     overlap_summary: str = Field(...)
     safety_guarantee_summary: str = Field(...)
 
+class AIFieldConflictRecommendationSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    field_name: str = Field(..., json_schema_extra={"example": "Phone Number"})
+    record_a_value: Optional[str] = Field(None)
+    record_b_value: Optional[str] = Field(None)
+    recommended_value: str = Field(...)
+    ai_rationale: str = Field(...)
+
+class AIClinicalSummarySchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    narrative_summary: str = Field(...)
+    active_conditions: List[str] = Field(default_factory=list)
+    clinical_conflicts: List[str] = Field(default_factory=list)
+
 class AIServiceResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     patient_match: AIMatchAnalysisSchema
     overlap_analyses: List[AIEventOverlapAnalysisSchema] = Field(default_factory=list)
     executive_summary: AIExecutiveSummarySchema
+    field_conflict_recommendations: List[AIFieldConflictRecommendationSchema] = Field(default_factory=list)
+    clinical_summary: Optional[AIClinicalSummarySchema] = Field(None)
     is_fallback: bool = Field(False)
     fallback_mode: Optional[str] = Field(None)
     generated_at: str = Field(...)

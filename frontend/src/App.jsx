@@ -5,6 +5,7 @@ import MergeApprovalWorkflow from './components/MergeApprovalWorkflow';
 import ZeroLossSafetyPanel from './components/ZeroLossSafetyPanel';
 import DataQualityPanel from './components/DataQualityPanel';
 import TimelineVisualizer from './components/TimelineVisualizer';
+import AIClinicalSummaryCard from './components/AIClinicalSummaryCard';
 import AuditTrailCard from './components/AuditTrailCard';
 import IntegrityTestModal from './components/IntegrityTestModal';
 import MergePreviewModal from './components/MergePreviewModal';
@@ -245,6 +246,12 @@ export default function App() {
               <ZeroLossSafetyPanel verification={reconciliation?.verification} />
               <DataQualityPanel verification={reconciliation?.verification} reconciliation={reconciliation} />
             </div>
+
+            {/* AI Clinical History & Physician Summary Card */}
+            <AIClinicalSummaryCard
+              aiAnalysis={reconciliation?.ai_analysis}
+              reconciliation={reconciliation}
+            />
 
             {/* Unified Chronological Timeline Visualizer */}
             <TimelineVisualizer
