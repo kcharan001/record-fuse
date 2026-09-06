@@ -127,7 +127,7 @@ export default function PatientRegistrationForm({ onPatientSaved }) {
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+    <div className="space-y-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600">
