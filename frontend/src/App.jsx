@@ -12,12 +12,13 @@ import ScenarioSelector from './components/ScenarioSelector';
 import PatientRegistrationForm from './components/PatientRegistrationForm';
 import MasterDatabaseDirectory from './components/MasterDatabaseDirectory';
 import { fetchRecords, executeReconciliation, fetchPairRecords, executePairReconciliation, apiClient } from './services/api';
-import { ShieldCheck, Info, Cpu, FileJson, Layers, Database, UserPlus } from 'lucide-react';
+import { ShieldCheck, Info, Cpu, FileJson, Layers, Database, UserPlus, Search } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('visualizer'); // 'visualizer' | 'database'
   const [selectedScenarioId, setSelectedScenarioId] = useState('DEMO');
   const [customPair, setCustomPair] = useState(null); // { patientAId, patientBId }
+  const [searchQuery, setSearchQuery] = useState('');
   const [recordData, setRecordData] = useState(null);
   const [reconciliation, setReconciliation] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -158,7 +159,19 @@ export default function App() {
             </button>
           </div>
 
-          <IntegrityTestModal />
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search patient, UPI, National ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 w-64 transition-all shadow-sm text-slate-800 placeholder-slate-400"
+              />
+            </div>
+            <IntegrityTestModal />
+          </div>
         </div>
 
         {error && (
@@ -171,14 +184,6 @@ export default function App() {
         {/* TAB 1: RECONCILIATION VISUALIZER */}
         {activeTab === 'visualizer' && (
           <div className="space-y-6">
-            {/* Callout Notice */}
-            <div className="flex items-center gap-2 p-4 rounded-2xl bg-white border border-slate-200 text-xs text-slate-600 shadow-sm">
-              <Info className="w-4 h-4 text-indigo-600 shrink-0" />
-              <span>
-                <strong className="text-slate-900">Immutable Original Records Notice:</strong> Original source records remain unchanged in SQLite. The composite timeline is a derived, zero-loss view.
-              </span>
-            </div>
-
             {/* Scenario Selector (If using synthetic scenarios) */}
             {!customPair && (
               <ScenarioSelector
@@ -248,6 +253,7 @@ export default function App() {
 
             <MasterDatabaseDirectory
               key={dbRefreshKey}
+              searchQuery={searchQuery}
               onSelectPairForReconciliation={handleSelectPairForReconciliation}
             />
           </div>

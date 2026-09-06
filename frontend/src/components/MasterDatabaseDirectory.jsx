@@ -4,7 +4,7 @@ import { fetchMasterDatabase, clearMasterDatabase } from '../services/api';
 import { downloadPatientReport } from '../utils/reportGenerator';
 import { getCountryConfig } from '../config/countriesConfig';
 
-export default function MasterDatabaseDirectory({ onSelectPairForReconciliation }) {
+export default function MasterDatabaseDirectory({ onSelectPairForReconciliation, searchQuery: externalSearchQuery = '' }) {
   const [data, setData] = useState({ total_patients: 0, patients: [] });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,12 +52,12 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation 
   };
 
   const filteredPatients = data.patients.filter((item) => {
-    const q = searchQuery.toLowerCase();
+    const q = (externalSearchQuery || searchQuery).toLowerCase();
     const p = item.patient;
     return (
       p.first_name.toLowerCase().includes(q) ||
       p.last_name.toLowerCase().includes(q) ||
-      p.ssn_last4.includes(q) ||
+      (p.ssn_last4 && p.ssn_last4.toLowerCase().includes(q)) ||
       (p.permanent_patient_id && p.permanent_patient_id.toLowerCase().includes(q))
     );
   });
