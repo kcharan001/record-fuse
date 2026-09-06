@@ -9,7 +9,7 @@ import AuditTrailCard from './components/AuditTrailCard';
 import IntegrityTestModal from './components/IntegrityTestModal';
 import MergePreviewModal from './components/MergePreviewModal';
 import ScenarioSelector from './components/ScenarioSelector';
-import PatientRegistrationForm from './components/PatientRegistrationForm';
+import PatientRegistrationModal from './components/PatientRegistrationModal';
 import MasterDatabaseDirectory from './components/MasterDatabaseDirectory';
 import { fetchRecords, executeReconciliation, fetchPairRecords, executePairReconciliation, apiClient } from './services/api';
 import { ShieldCheck, Info, Cpu, FileJson, Layers, Database, UserPlus, Search, X } from 'lucide-react';
@@ -185,6 +185,9 @@ export default function App() {
                 </button>
               )}
             </div>
+            <PatientRegistrationModal
+              onPatientSaved={() => setDbRefreshKey((prev) => prev + 1)}
+            />
             <IntegrityTestModal />
           </div>
         </div>
@@ -259,17 +262,13 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 2: MASTER DATABASE & PATIENT ENTRY */}
+        {/* TAB 2: MASTER DATABASE */}
         {activeTab === 'database' && (
           <div className="space-y-6">
             <MasterDatabaseDirectory
               key={dbRefreshKey}
               searchQuery={searchQuery}
               onSelectPairForReconciliation={handleSelectPairForReconciliation}
-            />
-
-            <PatientRegistrationForm
-              onPatientSaved={() => setDbRefreshKey((prev) => prev + 1)}
             />
           </div>
         )}
