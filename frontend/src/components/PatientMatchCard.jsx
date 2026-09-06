@@ -193,6 +193,48 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
               )}
             </div>
           </div>
+
+          {/* AI Weighted Factor Model Breakdown Grid */}
+          <div className="pt-3 border-t border-slate-200/80">
+            <span className="text-slate-700 font-bold block mb-2 text-xs flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              <span>RecordFuse AI Weighted Match Engine Breakdown:</span>
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
+              <div className="p-2 rounded-lg bg-white border border-slate-200 flex justify-between shadow-2xs">
+                <span>👤 Name</span>
+                <span className="font-bold text-indigo-700">25%</span>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-slate-200 flex justify-between shadow-2xs">
+                <span>📅 Date of Birth</span>
+                <span className="font-bold text-indigo-700">25%</span>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-slate-200 flex justify-between shadow-2xs">
+                <span>📱 Phone</span>
+                <span className="font-bold text-indigo-700">15%</span>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-slate-200 flex justify-between shadow-2xs">
+                <span>📧 Email</span>
+                <span className="font-bold text-indigo-700">10%</span>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-slate-200 flex justify-between shadow-2xs">
+                <span>🏠 Address</span>
+                <span className="font-bold text-indigo-700">10%</span>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-slate-200 flex justify-between shadow-2xs">
+                <span>🪪 National ID</span>
+                <span className="font-bold text-indigo-700">10%</span>
+              </div>
+              <div className="p-2 rounded-lg bg-white border border-slate-200 flex justify-between shadow-2xs">
+                <span>⚧️ Gender</span>
+                <span className="font-bold text-indigo-700">5%</span>
+              </div>
+              <div className="p-2 rounded-lg bg-indigo-50 border border-indigo-200 flex justify-between font-bold text-indigo-900 shadow-2xs">
+                <span>📊 Total Weight</span>
+                <span>100%</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

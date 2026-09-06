@@ -6,6 +6,67 @@ RECORD FUSE is a specialized healthcare data reconciliation platform designed to
 
 ---
 
+## Architecture & System Workflow
+
+For complete diagrams and mathematical formulas, see [Architecture Documentation](docs/architecture.md).
+
+```mermaid
+flowchart TD
+    subgraph Input["1. Disparate Healthcare Data Sources"]
+        RA["Record A: Outpatient Clinic<br/>(e.g., Jonathan Doe, 6 Events)"]
+        RB["Record B: Urgent Care Center<br/>(e.g., John Doe, 7 Events)"]
+    end
+
+    subgraph Phase1["2. Demographic Identity Matching"]
+        AI["Demographic Match Engine<br/>(DOB 40% + SSN 30% + Name 25%)"]
+        Score{"Match Confidence<br/>>= 70%?"}
+        UPI["Issue Permanent Master Patient ID<br/>(e.g., UPI-1982-4892-DOE)"]
+    end
+
+    subgraph Phase2["3. Deterministic Timeline Reconciliation"]
+        Rec["TimelineReconciler<br/>Timestamp Sorting (t_1 <= t_2 <= ... <= t_n)"]
+        Overlap["OverlapDetector<br/>Tag Exact Collisions (Δt = 0)<br/>Tag Near Overlaps (0 < Δt <= 30m)"]
+        Timeline["Unified Reconciled Timeline<br/>(100% of Events Retained Side-by-Side)"]
+    end
+
+    subgraph Phase3["4. Zero-Loss Machine Verification"]
+        Ver["ZeroLossVerifier<br/>Invariant: N_A + N_B == N_reconciled<br/>Lost Count == 0<br/>Provenance Intact == True"]
+        Proof{"Verification<br/>Status?"}
+        Pass["🟢 Status: PASS<br/>Machine Proof Certificate Issued"]
+    end
+
+    RA & RB --> AI --> Score -- ">= 70%" --> UPI --> Rec
+    RA & RB --> Rec --> Overlap --> Timeline --> Ver --> Proof --> Pass
+```
+
+---
+
+## 🤖 RecordFuse AI Match Analysis Model
+
+RecordFuse evaluates candidate patient duplicate pairs using a multi-factor weighted demographic confidence engine:
+
+```text
+🤖 RecordFuse AI Match Analysis
+
+I compared the two patient records using the following weighted factors:
+
+👤 Name              → 25%
+📅 Date of Birth     → 25%
+📱 Phone Number      → 15%
+📧 Email             → 10%
+🏠 Address           → 10%
+🪪 National ID       → 10%
+⚧️ Gender            →  5%
+────────────────────────
+📊 Total             → 100%
+
+Confidence Score: 90.5%
+Decision: 🟢 HIGH CONFIDENCE
+Action: APPROVED
+```
+
+---
+
 ## Project Structure
 
 ```
