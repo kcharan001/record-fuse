@@ -2,9 +2,11 @@ import React from 'react';
 import { UserCheck, AlertTriangle, CheckCircle2, QrCode, Sparkles } from 'lucide-react';
 import { getCountryConfig } from '../config/countriesConfig';
 
-export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
+export default function PatientMatchCard({ patientA, patientB, aiAnalysis, approvalStatus = 'PENDING' }) {
   const matchInfo = aiAnalysis?.patient_match;
   const confidencePercent = Math.round((matchInfo?.match_confidence || 0.95) * 100);
+  const isApproved = approvalStatus === 'APPROVED';
+  const isRejected = approvalStatus === 'REJECTED';
 
   const countryAConfig = getCountryConfig(patientA?.national_id_country || 'IN');
   const countryBConfig = getCountryConfig(patientB?.national_id_country || 'IN');
@@ -27,6 +29,24 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Explicit Human Merge Approval Status Badge */}
+          {isApproved ? (
+            <span className="text-xs bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              STATUS: APPROVED
+            </span>
+          ) : isRejected ? (
+            <span className="text-xs bg-rose-100 text-rose-800 border border-rose-300 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
+              <AlertTriangle className="w-4 h-4 text-rose-600" />
+              STATUS: REJECTED
+            </span>
+          ) : (
+            <span className="text-xs bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs animate-pulse">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              STATUS: REVIEW REQUIRED
+            </span>
+          )}
+
           {confidencePercent >= 70 ? (
             <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full font-bold flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />

@@ -181,20 +181,28 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
 
       {/* Pair Selection Status Banner */}
       {selectedPair.patientA || selectedPair.patientB ? (
-        <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <GitCompare className="w-4 h-4 text-indigo-600" />
-            <span className="text-slate-700">
-              Selected Pair for Reconciler: Record A = <strong className="text-indigo-900">{selectedPair.patientA || 'None'}</strong> | Record B = <strong className="text-indigo-900">{selectedPair.patientB || 'None'}</strong>
-            </span>
+        <div className="p-4 rounded-xl bg-indigo-50/80 border border-indigo-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <GitCompare className="w-4 h-4 text-indigo-600 shrink-0" />
+              <span className="text-slate-700 font-medium">
+                Selected Record Pair: Record A = <strong className="text-indigo-900 font-mono">{selectedPair.patientA || 'None'}</strong> | Record B = <strong className="text-purple-900 font-mono">{selectedPair.patientB || 'None'}</strong>
+              </span>
+            </div>
+
+            {selectedPair.patientA && selectedPair.patientB && (
+              <span className="text-[11px] bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full font-extrabold flex items-center gap-1 shadow-2xs">
+                STATUS: REVIEW REQUIRED
+              </span>
+            )}
           </div>
 
           {selectedPair.patientA && selectedPair.patientB && (
             <button
               onClick={() => onSelectPairForReconciliation && onSelectPairForReconciliation(selectedPair.patientA, selectedPair.patientB)}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-1.5 rounded-lg text-xs shadow-sm transition-all"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-xl text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
             >
-              Run Timeline Reconciler Now
+              Process & Reconcile Selected Pair Now
             </button>
           )}
         </div>

@@ -245,6 +245,7 @@ function AppContent() {
               patientA={recordData?.record_a?.patient}
               patientB={recordData?.record_b?.patient}
               aiAnalysis={reconciliation?.ai_analysis}
+              approvalStatus={reconciliation?.approval_status || 'PENDING'}
             />
 
             {/* Human-in-the-Loop Approval Workflow */}

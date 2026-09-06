@@ -99,6 +99,21 @@ export default function ScenarioSelector({ selectedScenarioId, onSelectScenario 
           <div className="flex items-center gap-3">
             {getCategoryBadge(selectedSc.category)}
             <span className="font-bold text-slate-800">{selectedSc.title}</span>
+
+            {/* Explicit Selected Scenario Approval Status Pill */}
+            {selectedSc.category === 'high_confidence_match' || selectedSc.scenario_id === 'DEMO' ? (
+              <span className="text-[11px] bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full font-extrabold flex items-center gap-1 shadow-2xs">
+                STATUS: APPROVED
+              </span>
+            ) : selectedSc.category === 'non_match' ? (
+              <span className="text-[11px] bg-rose-100 text-rose-800 border border-rose-300 px-2.5 py-0.5 rounded-full font-extrabold flex items-center gap-1 shadow-2xs">
+                STATUS: REJECTED
+              </span>
+            ) : (
+              <span className="text-[11px] bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full font-extrabold flex items-center gap-1 shadow-2xs animate-pulse">
+                STATUS: REVIEW REQUIRED
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-4 text-slate-500 font-medium">
             <span>Record A: <strong className="text-indigo-700 font-bold">{selectedSc.events_a_count}</strong> events</span>
