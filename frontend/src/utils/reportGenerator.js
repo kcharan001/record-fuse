@@ -87,8 +87,8 @@ export function downloadPatientReport(patient, events) {
       <div class="field-value">${patient.dob} (${patient.gender})</div>
     </div>
     <div>
-      <div class="field-label">SSN (Last 4)</div>
-      <div class="field-value" style="font-family: monospace;">***-**-${patient.ssn_last4 || '0000'}</div>
+      <div class="field-label">Aadhaar / National ID (Last 4)</div>
+      <div class="field-value" style="font-family: monospace;">****-****-${patient.ssn_last4 || '0000'}</div>
     </div>
     <div>
       <div class="field-label">Phone Number</div>

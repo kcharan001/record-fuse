@@ -72,8 +72,8 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
               <span className="font-mono text-slate-800">{patientA?.dob}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
-              <span className="text-slate-500">SSN Last 4:</span>
-              <span className="font-mono text-slate-800">***-**-{patientA?.ssn_last4}</span>
+              <span className="text-slate-500">Aadhaar / Nat'l ID:</span>
+              <span className="font-mono text-slate-800">****-****-{patientA?.ssn_last4}</span>
             </div>
             <div className="flex justify-between py-1">
               <span className="text-slate-500">Address:</span>
@@ -103,8 +103,8 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
               <span className="font-mono text-slate-800">{patientB?.dob}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
-              <span className="text-slate-500">SSN Last 4:</span>
-              <span className="font-mono text-slate-800">***-**-{patientB?.ssn_last4}</span>
+              <span className="text-slate-500">Aadhaar / Nat'l ID:</span>
+              <span className="font-mono text-slate-800">****-****-{patientB?.ssn_last4}</span>
             </div>
             <div className="flex justify-between py-1">
               <span className="text-slate-500">Address:</span>

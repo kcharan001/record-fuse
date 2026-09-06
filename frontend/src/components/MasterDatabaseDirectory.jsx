@@ -175,7 +175,7 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation 
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5" /> DOB: {patient.dob} ({patient.gender})
                         </span>
-                        <span>SSN: ***-**-{patient.ssn_last4}</span>
+                        <span>Aadhaar / Nat'l ID: ****-****-{patient.ssn_last4}</span>
                         {patient.phone && (
                           <span className="flex items-center gap-1">
                             <Phone className="w-3.5 h-3.5" /> {patient.phone}

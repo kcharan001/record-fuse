@@ -182,14 +182,14 @@ export default function PatientRegistrationForm({ onPatientSaved }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">SSN Last 4 *</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Aadhaar / Govt ID (Last 4) *</label>
             <input
               type="text"
               name="ssn_last4"
               maxLength={4}
               value={formData.ssn_last4}
               onChange={handleInputChange}
-              placeholder="e.g. 4892"
+              placeholder="e.g. 4892 (Last 4 digits)"
               className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-600 font-mono"
               required
             />
