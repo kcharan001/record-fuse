@@ -180,32 +180,15 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
         </div>
       ) : null}
 
-      {/* Search Input Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-          <input
-            type="text"
-            value={externalSearchQuery || searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search database by Name, Age, Phone, City, National ID/Country, UPI, Allergies, Labs..."
-            className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-10 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-600 transition-all"
-          />
-          {(externalSearchQuery || searchQuery) && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition-all"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+      {/* Active Search Filter Badge */}
+      {activeSearch && (
+        <div className="flex items-center justify-between p-3 rounded-xl bg-cyan-50 border border-cyan-200 text-xs text-cyan-800 font-medium shadow-sm">
+          <span>Active Search Filter: <strong className="text-cyan-950">"{activeSearch}"</strong></span>
+          <span className="font-bold bg-white px-2.5 py-1 rounded-lg border border-cyan-200">
+            {filteredPatients.length} of {data?.total_patients || 0} Patients Found
+          </span>
         </div>
-        {activeSearch && (
-          <div className="shrink-0 px-3 py-2 bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs font-semibold rounded-xl text-center">
-            Found {filteredPatients.length} of {data?.total_patients || 0} patients
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Patient Database List */}
       {loading ? (

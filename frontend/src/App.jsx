@@ -262,14 +262,14 @@ export default function App() {
         {/* TAB 2: MASTER DATABASE & PATIENT ENTRY */}
         {activeTab === 'database' && (
           <div className="space-y-6">
-            <PatientRegistrationForm
-              onPatientSaved={() => setDbRefreshKey((prev) => prev + 1)}
-            />
-
             <MasterDatabaseDirectory
               key={dbRefreshKey}
               searchQuery={searchQuery}
               onSelectPairForReconciliation={handleSelectPairForReconciliation}
+            />
+
+            <PatientRegistrationForm
+              onPatientSaved={() => setDbRefreshKey((prev) => prev + 1)}
             />
           </div>
         )}
