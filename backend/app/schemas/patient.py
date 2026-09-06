@@ -15,6 +15,7 @@ class PatientSchema(BaseModel):
     national_id_type: Optional[str] = Field("Aadhaar", json_schema_extra={"example": "Aadhaar"})
     national_id_last4: Optional[str] = Field("4892", json_schema_extra={"example": "4892"})
     phone: Optional[str] = Field(None, json_schema_extra={"example": "555-234-5678"})
+    email: Optional[str] = Field(None, json_schema_extra={"example": "jonathan.doe@example.com"})
     address: Optional[str] = Field(None, json_schema_extra={"example": "742 Evergreen Terrace"})
     permanent_patient_id: Optional[str] = Field(None, json_schema_extra={"example": "UPI-1982-4892-DOE"})
 
@@ -29,6 +30,7 @@ class PatientCreateSchema(BaseModel):
     national_id_type: Optional[str] = Field("Aadhaar", json_schema_extra={"example": "Aadhaar"})
     national_id_last4: Optional[str] = Field(None, json_schema_extra={"example": "4892"})
     phone: Optional[str] = Field(None, json_schema_extra={"example": "555-234-5678"})
+    email: Optional[str] = Field(None, json_schema_extra={"example": "jonathan.doe@example.com"})
     address: Optional[str] = Field(None, json_schema_extra={"example": "742 Evergreen Terrace"})
 
 class PatientUpsertResponseSchema(BaseModel):

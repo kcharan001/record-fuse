@@ -15,6 +15,7 @@ SYNTHETIC_PATIENTS = [
         "national_id_type": "Aadhaar",
         "national_id_last4": "4892",
         "phone": "555-234-5678",
+        "email": "jonathan.doe@example.com",
         "address": "742 Evergreen Terrace, Springfield"
     },
     {
@@ -28,6 +29,7 @@ SYNTHETIC_PATIENTS = [
         "national_id_type": "Aadhaar",
         "national_id_last4": "4892",
         "phone": "(555) 234-5678",
+        "email": "j.doe@example.com",
         "address": "742 Evergreen Terr, Springfield"
     }
 ]

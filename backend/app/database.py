@@ -32,7 +32,8 @@ def init_db():
             "ALTER TABLE patients ADD COLUMN age VARCHAR(20)",
             "ALTER TABLE patients ADD COLUMN national_id_country VARCHAR(10) DEFAULT 'IN'",
             "ALTER TABLE patients ADD COLUMN national_id_type VARCHAR(50) DEFAULT 'Aadhaar'",
-            "ALTER TABLE patients ADD COLUMN national_id_last4 VARCHAR(20)"
+            "ALTER TABLE patients ADD COLUMN national_id_last4 VARCHAR(20)",
+            "ALTER TABLE patients ADD COLUMN email VARCHAR(100)"
         ]:
             try:
                 conn.execute(text(col_def))

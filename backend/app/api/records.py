@@ -62,6 +62,8 @@ def create_or_update_patient(payload: PatientCreateSchema, db: Session = Depends
         existing_patient.national_id_last4 = last4_val
         if payload.phone:
             existing_patient.phone = payload.phone
+        if payload.email:
+            existing_patient.email = payload.email
         if payload.address:
             existing_patient.address = payload.address
         db.commit()
@@ -91,6 +93,7 @@ def create_or_update_patient(payload: PatientCreateSchema, db: Session = Depends
             national_id_type=type_val,
             national_id_last4=last4_val,
             phone=payload.phone,
+            email=payload.email,
             address=payload.address
         )
         db.add(new_patient)

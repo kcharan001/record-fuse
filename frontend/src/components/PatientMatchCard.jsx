@@ -79,6 +79,10 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
               <span className="font-mono text-slate-800">{patientA?.dob} {patientA?.age ? `(${patientA.age} yrs)` : ''}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
+              <span className="text-slate-500">Email:</span>
+              <span className="font-mono text-slate-800 font-medium">{patientA?.email || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between py-1 border-b border-slate-200/60">
               <span className="text-slate-500">National ID ({countryAConfig.flag} {countryAConfig.name}):</span>
               <span className="font-mono text-slate-800 font-bold">{patientA?.national_id_type || countryAConfig.idLabel}: ****{last4A}</span>
             </div>
@@ -108,6 +112,10 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
             <div className="flex justify-between py-1 border-b border-slate-200/60">
               <span className="text-slate-500">DOB & Age:</span>
               <span className="font-mono text-slate-800">{patientB?.dob} {patientB?.age ? `(${patientB.age} yrs)` : ''}</span>
+            </div>
+            <div className="flex justify-between py-1 border-b border-slate-200/60">
+              <span className="text-slate-500">Email:</span>
+              <span className="font-mono text-slate-800 font-medium">{patientB?.email || 'N/A'}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
               <span className="text-slate-500">National ID ({countryBConfig.flag} {countryBConfig.name}):</span>

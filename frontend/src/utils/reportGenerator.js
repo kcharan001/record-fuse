@@ -98,7 +98,11 @@ export function downloadPatientReport(patient, events) {
       <div class="field-label">Phone Number</div>
       <div class="field-value">${patient.phone || 'N/A'}</div>
     </div>
-    <div style="grid-column: span 3;">
+    <div>
+      <div class="field-label">Email Address</div>
+      <div class="field-value" style="font-family: monospace;">${patient.email || 'N/A'}</div>
+    </div>
+    <div style="grid-column: span 2;">
       <div class="field-label">Primary Address</div>
       <div class="field-value">${patient.address || 'N/A'}</div>
     </div>
@@ -222,8 +226,10 @@ export function downloadReconciledReport(patientA, patientB, reconciliation) {
       <div class="field-value">${patientA?.dob || 'N/A'} (${patientA?.gender || 'N/A'})</div>
       <div class="field-label">SSN (Last 4)</div>
       <div class="field-value font-mono">***-**-${patientA?.ssn_last4 || '0000'}</div>
-      <div class="field-label">Phone & Address</div>
-      <div class="field-value">${patientA?.phone || 'N/A'} | ${patientA?.address || 'N/A'}</div>
+      <div class="field-label">Phone & Email</div>
+      <div class="field-value">${patientA?.phone || 'N/A'} | ${patientA?.email || 'N/A'}</div>
+      <div class="field-label">Address</div>
+      <div class="field-value">${patientA?.address || 'N/A'}</div>
     </div>
 
     <div class="card">
@@ -234,8 +240,10 @@ export function downloadReconciledReport(patientA, patientB, reconciliation) {
       <div class="field-value">${patientB?.dob || 'N/A'} (${patientB?.gender || 'N/A'})</div>
       <div class="field-label">SSN (Last 4)</div>
       <div class="field-value font-mono">***-**-${patientB?.ssn_last4 || '0000'}</div>
-      <div class="field-label">Phone & Address</div>
-      <div class="field-value">${patientB?.phone || 'N/A'} | ${patientB?.address || 'N/A'}</div>
+      <div class="field-label">Phone & Email</div>
+      <div class="field-value">${patientB?.phone || 'N/A'} | ${patientB?.email || 'N/A'}</div>
+      <div class="field-label">Address</div>
+      <div class="field-value">${patientB?.address || 'N/A'}</div>
     </div>
   </div>
 

@@ -16,5 +16,6 @@ class Patient(Base):
     national_id_type = Column(String(50), default="Aadhaar", nullable=True)
     national_id_last4 = Column(String(20), nullable=True)
     phone = Column(String(20), nullable=True)
+    email = Column(String(100), nullable=True)
     address = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Search, Trash2, ChevronDown, ChevronUp, User, Calendar, Phone, MapPin, ShieldCheck, Activity, GitCompare, Download, X } from 'lucide-react';
+import { Database, Search, Trash2, ChevronDown, ChevronUp, User, Calendar, Phone, Mail, MapPin, ShieldCheck, Activity, GitCompare, Download, X } from 'lucide-react';
 import { fetchMasterDatabase, clearMasterDatabase } from '../services/api';
 import { downloadPatientReport } from '../utils/reportGenerator';
 import { getCountryConfig } from '../config/countriesConfig';
@@ -67,6 +67,7 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
     const ssnLast4 = p.ssn_last4 !== null && p.ssn_last4 !== undefined ? String(p.ssn_last4).toLowerCase() : '';
     const natIdLast4 = p.national_id_last4 !== null && p.national_id_last4 !== undefined ? String(p.national_id_last4).toLowerCase() : '';
     const phone = p.phone ? String(p.phone).toLowerCase() : '';
+    const email = p.email ? String(p.email).toLowerCase() : '';
     const dob = p.dob ? String(p.dob).toLowerCase() : '';
     const age = p.age !== null && p.age !== undefined ? String(p.age).toLowerCase() : '';
     const gender = p.gender ? String(p.gender).toLowerCase() : '';
@@ -89,6 +90,7 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
       ssnLast4.includes(activeSearch) ||
       natIdLast4.includes(activeSearch) ||
       phone.includes(activeSearch) ||
+      email.includes(activeSearch) ||
       dob.includes(activeSearch) ||
       age.includes(activeSearch) ||
       gender.includes(activeSearch) ||
@@ -244,6 +246,11 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
                         {patient.phone && (
                           <span className="flex items-center gap-1">
                             <Phone className="w-3.5 h-3.5" /> {patient.phone}
+                          </span>
+                        )}
+                        {patient.email && (
+                          <span className="flex items-center gap-1">
+                            <Mail className="w-3.5 h-3.5" /> {patient.email}
                           </span>
                         )}
                         {patient.address && (
