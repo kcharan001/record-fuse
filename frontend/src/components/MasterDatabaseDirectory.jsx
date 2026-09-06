@@ -3,8 +3,10 @@ import { Database, Search, Trash2, ChevronDown, ChevronUp, User, Calendar, Phone
 import { fetchMasterDatabase, clearMasterDatabase } from '../services/api';
 import { downloadPatientReport } from '../utils/reportGenerator';
 import { getCountryConfig } from '../config/countriesConfig';
+import { useNotifications } from '../context/NotificationContext';
 
 export default function MasterDatabaseDirectory({ onSelectPairForReconciliation, searchQuery: externalSearchQuery = '' }) {
+  const { addNotification } = useNotifications();
   const [data, setData] = useState({ total_patients: 0, patients: [] });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,6 +35,12 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
         await clearMasterDatabase();
         loadMasterData();
         setSelectedPair({ patientA: null, patientB: null });
+        addNotification({
+          type: 'error',
+          status: 'DATABASE WIPED',
+          title: 'Master Patient Database Cleared',
+          message: 'All registered patient records and clinical encounter histories were wiped from SQLite.',
+        });
       } catch (err) {
         alert('Failed to clear database');
       }
@@ -46,6 +54,18 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation,
   const handleSetPair = (patientId, role) => {
     const newPair = { ...selectedPair, [role]: patientId };
     setSelectedPair(newPair);
+
+    addNotification({
+      type: 'info',
+      status: 'UNDER REVIEW',
+      title: `Selected Patient as ${role === 'patientA' ? 'Record A' : 'Record B'}`,
+      message: `Patient ID ${patientId} designated for duplicate match review. ${newPair.patientA && newPair.patientB ? 'Both records ready to process!' : 'Select second record to begin.'}`,
+      actionLabel: newPair.patientA && newPair.patientB ? 'Process & Reconcile Now' : undefined,
+      actionOnClick: newPair.patientA && newPair.patientB ? () => {
+        if (onSelectPairForReconciliation) onSelectPairForReconciliation(newPair.patientA, newPair.patientB);
+      } : undefined
+    });
+
     if (newPair.patientA && newPair.patientB && onSelectPairForReconciliation) {
       onSelectPairForReconciliation(newPair.patientA, newPair.patientB);
     }

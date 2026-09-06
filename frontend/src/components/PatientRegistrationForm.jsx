@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { UserPlus, Calendar, Phone, MapPin, Shield, PlusCircle, CheckCircle2, RefreshCw, AlertCircle, Globe, Sparkles } from 'lucide-react';
 import { createOrUpdatePatient, addClinicalEvent } from '../services/api';
 import { COUNTRIES_LIST, getCountryConfig, validateNationalIdFormat, extractLast4Digits } from '../config/countriesConfig';
+import { useNotifications } from '../context/NotificationContext';
 
 export default function PatientRegistrationForm({ onPatientSaved }) {
+  const { addNotification } = useNotifications();
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -133,6 +135,18 @@ export default function PatientRegistrationForm({ onPatientSaved }) {
         type: 'success',
         updated: patResult.updated,
         message: patResult.message + (eventAdded ? ' Encounter record added.' : '')
+      });
+
+      // Trigger Global Database Notification
+      addNotification({
+        type: patResult.updated ? 'warning' : 'success',
+        status: 'UNDER REVIEW',
+        title: patResult.updated ? 'Existing Patient Record Updated' : 'New Patient Registered',
+        message: `${patResult.patient.first_name} ${patResult.patient.last_name} (${patResult.patient.permanent_patient_id || patResult.patient.id}) ${patResult.updated ? 'updated with new encounter' : 'stored in SQLite'}. Ready for processing & timeline reconciliation.`,
+        actionLabel: 'View in Directory',
+        actionOnClick: () => {
+          if (onPatientSaved) onPatientSaved();
+        }
       });
 
       // Clear event description

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Activity, RefreshCw, Cpu } from 'lucide-react';
 import PermanentIdLookupModal from './PermanentIdLookupModal';
+import NotificationCenterPopover from './NotificationCenterPopover';
 
 export default function Header({ aiStatus, onRefresh, loading }) {
   const isFallback = aiStatus?.is_fallback;
@@ -28,6 +29,9 @@ export default function Header({ aiStatus, onRefresh, loading }) {
 
         {/* Status Indicators & Controls */}
         <div className="flex items-center gap-3">
+          {/* Notification Bell Dropdown */}
+          <NotificationCenterPopover />
+
           {/* Permanent ID Master Lookup Modal Button */}
           <PermanentIdLookupModal />
 

@@ -12,10 +12,13 @@ import MergePreviewModal from './components/MergePreviewModal';
 import ScenarioSelector from './components/ScenarioSelector';
 import PatientRegistrationModal from './components/PatientRegistrationModal';
 import MasterDatabaseDirectory from './components/MasterDatabaseDirectory';
+import NotificationToastContainer from './components/NotificationToastContainer';
+import { NotificationProvider, useNotifications } from './context/NotificationContext';
 import { fetchRecords, executeReconciliation, fetchPairRecords, executePairReconciliation, apiClient } from './services/api';
 import { ShieldCheck, Info, Cpu, FileJson, Layers, Database, UserPlus, Search, X } from 'lucide-react';
 
-export default function App() {
+function AppContent() {
+  const { addNotification } = useNotifications();
   const [activeTab, setActiveTab] = useState('visualizer'); // 'visualizer' | 'database'
   const [selectedScenarioId, setSelectedScenarioId] = useState('DEMO');
   const [customPair, setCustomPair] = useState(null); // { patientAId, patientBId }
@@ -72,6 +75,12 @@ export default function App() {
         patient_b_id: recordData?.record_b?.patient?.id || 'REC-B',
         approval_status: 'APPROVED'
       });
+      addNotification({
+        type: 'success',
+        status: 'MERGE APPROVED',
+        title: 'Patient Record Merge Authorized',
+        message: `Clinical merge approved for ${recordData?.record_a?.patient?.first_name || 'Record A'} & ${recordData?.record_b?.patient?.first_name || 'Record B'}. Master UPI locked.`,
+      });
       loadData();
     } catch (err) {
       alert('Failed to update approval status');
@@ -85,6 +94,12 @@ export default function App() {
         patient_a_id: recordData?.record_a?.patient?.id || 'REC-A',
         patient_b_id: recordData?.record_b?.patient?.id || 'REC-B',
         approval_status: 'REJECTED'
+      });
+      addNotification({
+        type: 'warning',
+        status: 'MERGE REJECTED',
+        title: 'Patient Record Merge Rejected',
+        message: 'Duplicate record merge proposal rejected by clinical reviewer. Profiles remain unmerged.',
       });
       loadData();
     } catch (err) {
@@ -281,6 +296,9 @@ export default function App() {
         )}
       </main>
 
+      {/* Floating Real-Time Toast Notifications */}
+      <NotificationToastContainer />
+
       {/* Pre-Approval Preview Modal */}
       <MergePreviewModal
         isOpen={previewOpen}
@@ -294,5 +312,13 @@ export default function App() {
         RECORD FUSE — Duplicate Patient Record Merge System (Enterprise Hackathon Demo)
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <NotificationProvider>
+      <AppContent />
+    </NotificationProvider>
   );
 }
