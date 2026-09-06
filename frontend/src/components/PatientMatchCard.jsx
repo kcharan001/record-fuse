@@ -68,8 +68,8 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
               <span className="font-bold text-slate-900">{patientA?.first_name} {patientA?.last_name}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
-              <span className="text-slate-500">DOB:</span>
-              <span className="font-mono text-slate-800">{patientA?.dob}</span>
+              <span className="text-slate-500">DOB & Age:</span>
+              <span className="font-mono text-slate-800">{patientA?.dob} {patientA?.age ? `(${patientA.age} yrs)` : ''}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
               <span className="text-slate-500">Aadhaar / Nat'l ID:</span>
@@ -99,8 +99,8 @@ export default function PatientMatchCard({ patientA, patientB, aiAnalysis }) {
               <span className="font-bold text-slate-900">{patientB?.first_name} {patientB?.last_name}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
-              <span className="text-slate-500">DOB:</span>
-              <span className="font-mono text-slate-800">{patientB?.dob}</span>
+              <span className="text-slate-500">DOB & Age:</span>
+              <span className="font-mono text-slate-800">{patientB?.dob} {patientB?.age ? `(${patientB.age} yrs)` : ''}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-200/60">
               <span className="text-slate-500">Aadhaar / Nat'l ID:</span>

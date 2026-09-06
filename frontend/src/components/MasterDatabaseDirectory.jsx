@@ -173,7 +173,7 @@ export default function MasterDatabaseDirectory({ onSelectPairForReconciliation 
 
                       <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-1">
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" /> DOB: {patient.dob} ({patient.gender})
+                          <Calendar className="w-3.5 h-3.5" /> DOB: {patient.dob} {patient.age ? `(Age ${patient.age})` : ''} ({patient.gender})
                         </span>
                         <span>Aadhaar / Nat'l ID: ****-****-{patient.ssn_last4}</span>
                         {patient.phone && (

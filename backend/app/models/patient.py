@@ -9,6 +9,7 @@ class Patient(Base):
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     dob = Column(String(20), nullable=False) # ISO YYYY-MM-DD
+    age = Column(String(20), nullable=True) # e.g. "22"
     gender = Column(String(20), nullable=False)
     ssn_last4 = Column(String(4), nullable=False)
     phone = Column(String(20), nullable=True)

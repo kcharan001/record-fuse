@@ -49,6 +49,8 @@ def create_or_update_patient(payload: PatientCreateSchema, db: Session = Depends
 
     if existing_patient:
         existing_patient.dob = payload.dob
+        if payload.age:
+            existing_patient.age = payload.age
         existing_patient.gender = payload.gender
         existing_patient.ssn_last4 = payload.ssn_last4
         if payload.phone:
@@ -75,6 +77,7 @@ def create_or_update_patient(payload: PatientCreateSchema, db: Session = Depends
             first_name=first_clean,
             last_name=last_clean,
             dob=payload.dob,
+            age=payload.age,
             gender=payload.gender,
             ssn_last4=payload.ssn_last4,
             phone=payload.phone,
